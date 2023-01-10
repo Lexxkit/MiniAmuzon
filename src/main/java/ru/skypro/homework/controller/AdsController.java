@@ -14,6 +14,7 @@ public class AdsController {
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
+        log.info("Was invoked get all ads method");
         return ResponseEntity.ok(new ResponseWrapperAds());
     }
 
@@ -45,9 +46,24 @@ public class AdsController {
         return ResponseEntity.ok(new Ads());
     }
 
-    // TODO: 10.01.2023 GET getComments /ads/{ad_pk}/comments/{id}
-    // TODO: 10.01.2023 DELETE deleteComments /ads/{ad_pk}/comments/{id}
-    // TODO: 10.01.2023 PATCH updateComments /ads/{ad_pk}/comments/{id}
+    @GetMapping("/{ad_pk}/comments/{id}")
+    public ResponseEntity<Comment> getComments(@PathVariable("ad_pk") String adPk,
+                                               @PathVariable int id) {
+        return ResponseEntity.ok(new Comment());
+    }
+
+    @DeleteMapping("{ad_pk}/comments/{id}")
+    public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") String adPk,
+                                               @PathVariable int id) {
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("{ad_pk}/comments/{id}")
+    public ResponseEntity<Comment> updateComments(@PathVariable("ad_pk") String adPk,
+                                                  @PathVariable int id,
+                                                  @RequestBody Comment comment) {
+        return ResponseEntity.ok(comment);
+    }
 
 
     @GetMapping("/me")
