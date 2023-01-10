@@ -33,7 +33,10 @@ public class AdsController {
         return ResponseEntity.ok(new Comment());
     }
 
-    // TODO: 10.01.2023 GET getFullAd /ads/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<FullAds> getFullAd(@PathVariable int id) {
+        return ResponseEntity.ok(new FullAds());
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(@PathVariable int id) {
