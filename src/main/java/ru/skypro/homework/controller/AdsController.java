@@ -109,6 +109,19 @@ public class AdsController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "updateAds",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.ALL_VALUE,
+                                    schema = @Schema(implementation = Ads.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", content = @Content),
+                    @ApiResponse(responseCode = "403", content = @Content),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @PatchMapping("/{id}")
     public ResponseEntity<Ads> updateAds(@PathVariable int id,
                                          @RequestBody CreateAds createAds) {
@@ -116,6 +129,17 @@ public class AdsController {
         return ResponseEntity.ok(new Ads());
     }
 
+    @Operation(summary = "getComments",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.ALL_VALUE,
+                                    schema = @Schema(implementation = Comment.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @GetMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<Comment> getComments(@PathVariable("ad_pk") String adPk,
                                                @PathVariable int id) {
@@ -123,6 +147,13 @@ public class AdsController {
         return ResponseEntity.ok(new Comment());
     }
 
+    @Operation(summary = "deleteComments",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content),
+                    @ApiResponse(responseCode = "401", content = @Content),
+                    @ApiResponse(responseCode = "403", content = @Content),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @DeleteMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") String adPk,
                                                @PathVariable int id) {
@@ -130,6 +161,19 @@ public class AdsController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "updateComments",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.ALL_VALUE,
+                                    schema = @Schema(implementation = Comment.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", content = @Content),
+                    @ApiResponse(responseCode = "403", content = @Content),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @PatchMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<Comment> updateComments(@PathVariable("ad_pk") String adPk,
                                                   @PathVariable int id,
@@ -139,6 +183,19 @@ public class AdsController {
     }
 
 
+    @Operation(summary = "getAdsMe",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.ALL_VALUE,
+                                    schema = @Schema(implementation = ResponseWrapperAds.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "401", content = @Content),
+                    @ApiResponse(responseCode = "403", content = @Content),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperAds> getAdsMe(@RequestParam(value = "authenticated", required = false) Boolean authenticated,
                                                        @RequestParam(value = "authorities[0].authority", required = false) String authority,
