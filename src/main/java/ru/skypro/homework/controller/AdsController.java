@@ -2,8 +2,10 @@ package ru.skypro.homework.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 
 @Slf4j
@@ -18,21 +20,22 @@ public class AdsController {
         return ResponseEntity.ok(new ResponseWrapperAds());
     }
 
-    @PostMapping
-    public ResponseEntity<Ads> addAds(@RequestBody CreateAds createAds) { /// TODO: 10.01.2023 дополнить сохранением изображения!!!
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Ads> addAds(@RequestPart(value = "properties") CreateAds createAds,
+                                      @RequestPart(value = "image") MultipartFile image) {
         log.info("Was invoked add ad method");
         return ResponseEntity.status(HttpStatus.CREATED).body(new Ads());
     }
 
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk") String adPk) {
-        log.info("Was invoked get all comments for ad method");
+        log.info("Was invoked get all comments for ad = {} method", adPk);
         return ResponseEntity.ok(new ResponseWrapperComment());
     }
 
     @PostMapping("/{ad_pk}/comments")
     public ResponseEntity<Comment> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody Comment comment) {
-        log.info("Was invoked add comment for ad method");
+        log.info("Was invoked add comment for ad = {} method", adPk);
         return ResponseEntity.ok(new Comment());
     }
 
