@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 
+import java.util.ArrayList;
+
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -21,7 +23,9 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
         log.info("Was invoked get all ads method");
-        return ResponseEntity.ok(new ResponseWrapperAds());
+        ResponseWrapperAds responseWrapperAds = new ResponseWrapperAds();
+        responseWrapperAds.setResults(new ArrayList<>());
+        return ResponseEntity.ok(responseWrapperAds);
     }
 
     @Operation(summary = "addAds",
