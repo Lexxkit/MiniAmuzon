@@ -42,10 +42,10 @@ public class AdsController {
             @ApiResponse(responseCode = "404", content = @Content)
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Ads> addAds(@RequestPart(value = "properties") CreateAds createAds,
-                                      @RequestPart(value = "image") MultipartFile image) {
+    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "properties") CreateAdsDto createAds,
+                                         @RequestPart(value = "image") MultipartFile image) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Ads());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AdsDto());
     }
 
     @Operation(summary = "getComments",
@@ -79,9 +79,9 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<Comment> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody Comment comment) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto comment) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        return ResponseEntity.ok(new Comment());
+        return ResponseEntity.ok(new CommentDto());
     }
 
     @Operation(summary = "getFullAd",
@@ -96,9 +96,9 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @GetMapping("/{id}")
-    public ResponseEntity<FullAds> getFullAd(@PathVariable int id) {
+    public ResponseEntity<FullAdsDto> getFullAd(@PathVariable int id) {
         log.info("Was invoked get full ad by id = {} method", id);
-        return ResponseEntity.ok(new FullAds());
+        return ResponseEntity.ok(new FullAdsDto());
     }
 
     @Operation(summary = "removeAds",
@@ -127,10 +127,10 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PatchMapping("/{id}")
-    public ResponseEntity<Ads> updateAds(@PathVariable int id,
-                                         @RequestBody CreateAds createAds) {
+    public ResponseEntity<AdsDto> updateAds(@PathVariable int id,
+                                            @RequestBody CreateAdsDto createAdsDto) {
         log.info("Was invoked update ad by id = {} method", id);
-        return ResponseEntity.ok(new Ads());
+        return ResponseEntity.ok(new AdsDto());
     }
 
     @Operation(summary = "getComments",
@@ -145,10 +145,10 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @GetMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<Comment> getComments(@PathVariable("ad_pk") String adPk,
-                                               @PathVariable int id) {
+    public ResponseEntity<CommentDto> getComments(@PathVariable("ad_pk") String adPk,
+                                                  @PathVariable int id) {
         log.info("Was invoked get ad's comment by id = {} method", id);
-        return ResponseEntity.ok(new Comment());
+        return ResponseEntity.ok(new CommentDto());
     }
 
     @Operation(summary = "deleteComments",
@@ -179,11 +179,11 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PatchMapping("{ad_pk}/comments/{id}")
-    public ResponseEntity<Comment> updateComments(@PathVariable("ad_pk") String adPk,
-                                                  @PathVariable int id,
-                                                  @RequestBody Comment comment) {
+    public ResponseEntity<CommentDto> updateComments(@PathVariable("ad_pk") String adPk,
+                                                     @PathVariable int id,
+                                                     @RequestBody CommentDto commentDto) {
         log.info("Was invoked update ad's = {} comment by id = {} method", adPk, id);
-        return ResponseEntity.ok(comment);
+        return ResponseEntity.ok(commentDto);
     }
 
 
