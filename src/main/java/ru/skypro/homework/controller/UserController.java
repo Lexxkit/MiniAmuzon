@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.UserDto;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -18,22 +18,22 @@ public class UserController {
 
 
     @PostMapping("/set_password")
-    public ResponseEntity<NewPassword> setPassword(@RequestBody String currentPassword,
-                                                                String newPassword ) {
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestParam(value = "currentPassword", required = false) String currentPassword,
+                                                      @RequestParam(value = "newPassword", required = false) String newPassword ) {
         log.info("Was invoked set password for user method");
-        return ResponseEntity.ok(new NewPassword());
+        return ResponseEntity.ok(new NewPasswordDto());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getUsers() {
+    public ResponseEntity<UserDto> getUsers() {
         log.info("Was invoked get all users method");
-        return ResponseEntity.ok(new User());
+        return ResponseEntity.ok(new UserDto());
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<User> updateUser(@RequestBody User dto) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto) {
         log.info("Was invoked update user method");
-        return ResponseEntity.ok(new User());
+        return ResponseEntity.ok(new UserDto());
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
