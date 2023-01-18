@@ -28,7 +28,7 @@ public class User {
     private Avatar avatar;
 
     @OneToMany(mappedBy = "author")
-    private List<Ad> ads;
+    private List<Ads> adsList;
 
 
 }

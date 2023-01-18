@@ -18,6 +18,6 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User author;
     @ManyToOne
-    @JoinColumn(name = "ad_id")
-    private Ad ad;
+    @JoinColumn(name = "ads_id")
+    private Ads ads;
 }
