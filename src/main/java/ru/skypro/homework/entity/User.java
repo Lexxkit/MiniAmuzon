@@ -1,43 +1,34 @@
 package ru.skypro.homework.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@Table(name = "Users")
-public class UserEntity {
-
-    public enum UserRole {
-        USER,
-        ADMIN
-    }
-
+@Data
+@Table(name = "users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "first_name")
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
-
     private String email;
     private String phone;
     private String city;
     private LocalDateTime regDate;
+    private String password;
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 
-    @OneToOne
-    @PrimaryKeyJoinColumn
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Avatar avatar;
 
-    private String password;
+    @OneToMany(mappedBy = "author")
+    private List<Ad> ads;
+
 
 }
