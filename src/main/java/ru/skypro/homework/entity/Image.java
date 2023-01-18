@@ -16,7 +16,7 @@ public class Image {
     @Lob
     private byte[] data;
     @ManyToOne
-    @JoinColumn(name = "ad_id")
-    private Ad ad;
+    @JoinColumn(name = "ads_id")
+    private Ads ads;
 
 }
