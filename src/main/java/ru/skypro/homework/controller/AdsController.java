@@ -34,7 +34,7 @@ public class AdsController {
                     responseCode = "201",
                     content = @Content(
                             mediaType = MediaType.ALL_VALUE,
-                            schema = @Schema(implementation = Ads.class)
+                            schema = @Schema(implementation = AdsDto.class)
                     )
             ),
             @ApiResponse(responseCode = "401", content = @Content),
@@ -71,7 +71,7 @@ public class AdsController {
                             responseCode = "200",
                             content = @Content(
                                     mediaType = MediaType.ALL_VALUE,
-                                    schema = @Schema(implementation = Comment.class)
+                                    schema = @Schema(implementation = CommentDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", content = @Content),
@@ -90,7 +90,7 @@ public class AdsController {
                             responseCode = "200",
                             content = @Content(
                                     mediaType = MediaType.ALL_VALUE,
-                                    schema = @Schema(implementation = FullAds.class)
+                                    schema = @Schema(implementation = FullAdsDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "404", content = @Content)
@@ -119,7 +119,7 @@ public class AdsController {
                             responseCode = "200",
                             content = @Content(
                                     mediaType = MediaType.ALL_VALUE,
-                                    schema = @Schema(implementation = Ads.class)
+                                    schema = @Schema(implementation = AdsDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", content = @Content),
@@ -139,7 +139,7 @@ public class AdsController {
                             responseCode = "200",
                             content = @Content(
                                     mediaType = MediaType.ALL_VALUE,
-                                    schema = @Schema(implementation = Comment.class)
+                                    schema = @Schema(implementation = CommentDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "404", content = @Content)
@@ -171,7 +171,7 @@ public class AdsController {
                             responseCode = "200",
                             content = @Content(
                                     mediaType = MediaType.ALL_VALUE,
-                                    schema = @Schema(implementation = Comment.class)
+                                    schema = @Schema(implementation = CommentDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", content = @Content),
