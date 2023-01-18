@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,21 +12,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-
-import java.util.ArrayList;
+import ru.skypro.homework.service.AdsService;
 
 @Slf4j
+@RequiredArgsConstructor
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping(path = "/ads")
 public class AdsController {
 
+    private final AdsService adsService;
+
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
         log.info("Was invoked get all ads method");
-        ResponseWrapperAds responseWrapperAds = new ResponseWrapperAds();
-        responseWrapperAds.setResults(new ArrayList<>());
-        return ResponseEntity.ok(responseWrapperAds);
+        return ResponseEntity.ok(adsService.findAllAds());
     }
 
     @Operation(summary = "addAds",
