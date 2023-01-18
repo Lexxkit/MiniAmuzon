@@ -6,18 +6,17 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "avatars")
-public class Avatar {
-
+@Table(name = "images")
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer fileSize;
+    private String mediaType;
     @Lob
-    private byte[] image;
-    @OneToOne
-    private User user;
-
-
-
+    private byte[] data;
+    @ManyToOne
+    @JoinColumn(name = "ad_id")
+    private Ad ad;
 
 }
