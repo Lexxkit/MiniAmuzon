@@ -9,14 +9,12 @@ import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
-import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.exceptions.AdsNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsDto createAds(CreateAdsDto createAdsDto) {
+    public AdsDto createAds(CreateAdsDto createAdsDto, MultipartFile image) {
         log.info("Was invoked createAds method from {}", AdsService.class.getSimpleName());
         Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
         // Добавить обработку изображения и добавление его в список к рекламе!
@@ -42,7 +40,37 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public FullAdsDto findFullAdsById(long id) {
-        Ads ads = adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
+        Ads ads = getAdsById(id);
         return adsMapper.adsToFullAdsDto(ads);
+    }
+
+    @Override
+    public void removeAds(long id) {
+        Ads ads = getAdsById(id);
+        adsRepository.delete(ads);
+    }
+
+    @Override
+    public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto) {
+        Ads oldAds = getAdsById(id);
+        Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
+
+        oldAds.setPrice(infoToUpdate.getPrice());
+        oldAds.setTitle(infoToUpdate.getTitle());
+        oldAds.setDescription(infoToUpdate.getDescription());
+
+        Ads updatedAds = adsRepository.save(oldAds);
+        return adsMapper.adsToAdsDto(updatedAds);
+    }
+
+    @Override
+    public ResponseWrapperAds findAllAdsForUser(String username) {
+        // TODO: 18.01.2023 Refactor with UserRepository - find user by email (thr exception), then user.getAdsList()
+        List<Ads> userAdsList = adsRepository.findAdsByAuthorEmail(username);
+        return adsMapper.adsListToResponseWrapperAds(userAdsList.size(), userAdsList);
+    }
+
+    private Ads getAdsById(long id) {
+        return adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
     }
 }
