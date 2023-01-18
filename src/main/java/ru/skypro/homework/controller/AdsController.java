@@ -43,10 +43,10 @@ public class AdsController {
             @ApiResponse(responseCode = "404", content = @Content)
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "properties") CreateAdsDto createAds,
-                                         @RequestPart(value = "image") MultipartFile image) {
+    public ResponseEntity<AdsDto> addAds(@RequestPart(name = "properties") CreateAdsDto createAds,
+                                         @RequestPart(name = "image") MultipartFile image) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AdsDto());
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds));
     }
 
     @Operation(summary = "getComments",
@@ -99,7 +99,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getFullAd(@PathVariable int id) {
         log.info("Was invoked get full ad by id = {} method", id);
-        return ResponseEntity.ok(new FullAdsDto());
+        return ResponseEntity.ok(adsService.findFullAdsById(id));
     }
 
     @Operation(summary = "removeAds",
