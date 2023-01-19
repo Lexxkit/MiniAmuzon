@@ -1,5 +1,9 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -19,6 +23,17 @@ public class ImageController {
 
     private  final ImageService imageService;
 
+    @Operation(summary = "updateAdsImage",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                                    schema = @Schema(implementation = byte[].class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @PatchMapping (value = "/image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
         log.info("Was invoked updateAdsImage method from {}", ImageController.class.getSimpleName());
