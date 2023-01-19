@@ -23,5 +23,4 @@ public class ImageController {
       String[] images = {"image_001"};
         return ResponseEntity.ok().build();
     }
-
 }
