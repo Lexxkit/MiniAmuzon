@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.User;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,20 +34,32 @@ class AdsServiceImplTest {
     private AdsServiceImpl out;
 
     private List<Ads> adsList;
+    private Ads ads1;
+    private Ads ads2;
+    private CreateAdsDto createAdsDto;
+    private User testUser;
     @BeforeEach
     void init() {
-        User testUser = new User();
+        testUser = new User();
         testUser.setId(42L);
-        Ads ads1 = new Ads();
+
+        createAdsDto = new CreateAdsDto();
+        createAdsDto.setDescription("Test description");
+        createAdsDto.setTitle("Test title");
+        createAdsDto.setPrice(10);
+
+        ads1 = new Ads();
         ads1.setId(1L);
         ads1.setPrice(new BigDecimal(10));
         ads1.setTitle("Test ads");
         ads1.setAuthor(testUser);
-        Ads ads2 = new Ads();
+
+        ads2 = new Ads();
         ads2.setId(2L);
         ads2.setPrice(new BigDecimal(20));
         ads2.setTitle("Test ads 2");
         ads2.setAuthor(testUser);
+
         adsList = List.of(ads1, ads2);
     }
 
@@ -61,7 +76,13 @@ class AdsServiceImplTest {
 
     @Test
     void shouldReturnAdsDtoFromCreateAdsDto() {
-        when(adsRepository.save())
+        Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
+        when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
+        AdsDto result = out.createAds(createAdsDto, null);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo(createAdsDto.getTitle());
+        assertThat(result.getPrice()).isEqualTo(createAdsDto.getPrice());
     }
 
 }
