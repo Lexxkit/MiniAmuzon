@@ -59,9 +59,6 @@ class AdsServiceImplTest {
         assertThat(result.getResults()).isNotNull();
     }
 
-    @Test
-    void shouldReturnAdsDtoFromCreateAdsDto() {
-        when(adsRepository.save())
-    }
+
 
 }
