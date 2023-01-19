@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
 
@@ -26,7 +25,7 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
         log.info("Was invoked get all ads method");
-        return ResponseEntity.ok(adsService.findAllAds());
+        return ResponseEntity.ok(adsService.getAllAds());
     }
 
     @Operation(summary = "addAds",
@@ -42,11 +41,12 @@ public class AdsController {
             @ApiResponse(responseCode = "403", content = @Content),
             @ApiResponse(responseCode = "404", content = @Content)
     })
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "properties") CreateAdsDto createAds,
-                                         @RequestPart(value = "image") MultipartFile image) {
+    @PostMapping
+    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto createAds
+//                                         @RequestPart("image") MultipartFile image
+                                         ) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AdsDto());
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, null));
     }
 
     @Operation(summary = "getComments",
@@ -63,6 +63,7 @@ public class AdsController {
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk") String adPk) {
         log.info("Was invoked get all comments for ad = {} method", adPk);
+        // TODO: 18.01.2023 add service
         return ResponseEntity.ok(new ResponseWrapperComment());
     }
 
@@ -82,6 +83,7 @@ public class AdsController {
     @PostMapping("/{ad_pk}/comments")
     public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto comment) {
         log.info("Was invoked add comment for ad = {} method", adPk);
+        // TODO: 18.01.2023 add service
         return ResponseEntity.ok(new CommentDto());
     }
 
@@ -99,7 +101,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getFullAd(@PathVariable int id) {
         log.info("Was invoked get full ad by id = {} method", id);
-        return ResponseEntity.ok(new FullAdsDto());
+        return ResponseEntity.ok(adsService.getFullAdsById(id));
     }
 
     @Operation(summary = "removeAds",
@@ -111,6 +113,7 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(@PathVariable int id) {
         log.info("Was invoked delete ad by id = {} method", id);
+        adsService.removeAds(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -131,7 +134,7 @@ public class AdsController {
     public ResponseEntity<AdsDto> updateAds(@PathVariable int id,
                                             @RequestBody CreateAdsDto createAdsDto) {
         log.info("Was invoked update ad by id = {} method", id);
-        return ResponseEntity.ok(new AdsDto());
+        return ResponseEntity.ok(adsService.updateAdsById(id, createAdsDto));
     }
 
     @Operation(summary = "getComments",
@@ -149,6 +152,7 @@ public class AdsController {
     public ResponseEntity<CommentDto> getComments(@PathVariable("ad_pk") String adPk,
                                                   @PathVariable int id) {
         log.info("Was invoked get ad's comment by id = {} method", id);
+        // TODO: 18.01.2023 add service
         return ResponseEntity.ok(new CommentDto());
     }
 
@@ -163,6 +167,7 @@ public class AdsController {
     public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") String adPk,
                                                @PathVariable int id) {
         log.info("Was invoked delete ad's comment by id = {} method", id);
+        // TODO: 18.01.2023 add service
         return ResponseEntity.ok().build();
     }
 
@@ -184,6 +189,7 @@ public class AdsController {
                                                      @PathVariable int id,
                                                      @RequestBody CommentDto commentDto) {
         log.info("Was invoked update ad's = {} comment by id = {} method", adPk, id);
+        // TODO: 18.01.2023 add service
         return ResponseEntity.ok(commentDto);
     }
 
@@ -208,6 +214,7 @@ public class AdsController {
                                                        @RequestParam(value = "details", required = false) Object details,
                                                        @RequestParam(value = "principal", required = false) Object principal) {
         log.info("Was invoked get all ads for current user = {} method", principal);
-        return ResponseEntity.ok(new ResponseWrapperAds());
+        // TODO: Получить инфо о авторизованном пользователе и передать в сервис вместо authority
+        return ResponseEntity.ok(adsService.getAllAdsForUser(authority));
     }
 }
