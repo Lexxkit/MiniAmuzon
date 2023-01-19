@@ -23,7 +23,7 @@ public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
     private final AdsMapper adsMapper;
     @Override
-    public ResponseWrapperAds findAllAds() {
+    public ResponseWrapperAds getAllAds() {
         log.info("Was invoked findAllAds method from {}", AdsService.class.getSimpleName());
         List<Ads> adsList = adsRepository.findAll();
         return adsMapper.adsListToResponseWrapperAds(adsList.size(), adsList);
@@ -39,7 +39,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public FullAdsDto findFullAdsById(long id) {
+    public FullAdsDto getFullAdsById(long id) {
         Ads ads = getAdsById(id);
         return adsMapper.adsToFullAdsDto(ads);
     }
@@ -64,13 +64,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseWrapperAds findAllAdsForUser(String username) {
+    public ResponseWrapperAds getAllAdsForUser(String username) {
         // TODO: 18.01.2023 Refactor with UserRepository - find user by email (thr exception), then user.getAdsList()
         List<Ads> userAdsList = adsRepository.findAdsByAuthorEmail(username);
         return adsMapper.adsListToResponseWrapperAds(userAdsList.size(), userAdsList);
     }
 
-    private Ads getAdsById(long id) {
+    @Override
+    public Ads getAdsById(long id) {
         return adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
     }
 }

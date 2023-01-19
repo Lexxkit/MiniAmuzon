@@ -25,7 +25,7 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
         log.info("Was invoked get all ads method");
-        return ResponseEntity.ok(adsService.findAllAds());
+        return ResponseEntity.ok(adsService.getAllAds());
     }
 
     @Operation(summary = "addAds",
@@ -101,7 +101,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getFullAd(@PathVariable int id) {
         log.info("Was invoked get full ad by id = {} method", id);
-        return ResponseEntity.ok(adsService.findFullAdsById(id));
+        return ResponseEntity.ok(adsService.getFullAdsById(id));
     }
 
     @Operation(summary = "removeAds",
@@ -215,6 +215,6 @@ public class AdsController {
                                                        @RequestParam(value = "principal", required = false) Object principal) {
         log.info("Was invoked get all ads for current user = {} method", principal);
         // TODO: Получить инфо о авторизованном пользователе и передать в сервис вместо authority
-        return ResponseEntity.ok(adsService.findAllAdsForUser(authority));
+        return ResponseEntity.ok(adsService.getAllAdsForUser(authority));
     }
 }

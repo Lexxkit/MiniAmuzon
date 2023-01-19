@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AdMapperTest {
+public class AdsMapperTest {
 
     private final AdsMapper adsMapper = Mappers.getMapper(AdsMapper.class);
     @Test
