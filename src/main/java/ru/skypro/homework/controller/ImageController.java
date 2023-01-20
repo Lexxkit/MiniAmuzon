@@ -1,5 +1,11 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,20 +14,35 @@ import ru.skypro.homework.service.ImageService;
 
 import java.io.IOException;
 
+@Slf4j
+@RequiredArgsConstructor
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping
 public class ImageController {
 
     private  final ImageService imageService;
 
-    public ImageController(ImageService imageService) {
-        this.imageService = imageService;
-    }
-
+    @Operation(summary = "updateAdsImage",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                                    schema = @Schema(implementation = byte[].class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @PatchMapping (value = "/image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
-      String[] images = {"image_001"};
-        return ResponseEntity.ok().build();
+    public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
+        log.info("Was invoked updateAdsImage method from {}", ImageController.class.getSimpleName());
+        try {
+            byte[] imageBytes = imageService.updateAdsImage(id, image);
+            return ResponseEntity.ok(imageBytes);
+        } catch (IOException e) {
+            log.error("Image has some problems and cannot be read");
+            throw new RuntimeException("Problems with uploaded image");
+        }
     }
-
 }
