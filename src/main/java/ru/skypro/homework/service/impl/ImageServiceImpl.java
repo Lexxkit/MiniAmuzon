@@ -16,7 +16,14 @@ import java.io.IOException;
 @Service
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
-
+    /**
+     * Receive old image by id, update and save
+     *
+     * @param id
+     * @param file
+     * @return image updated
+     * @throws IOException if no image was found
+     */
     @Override
     public byte[] updateAdsImage(long id, MultipartFile file) throws IOException {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
