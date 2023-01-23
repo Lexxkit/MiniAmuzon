@@ -1,0 +1,1 @@
+CREATE INDEX person_name_index ON person (name);
