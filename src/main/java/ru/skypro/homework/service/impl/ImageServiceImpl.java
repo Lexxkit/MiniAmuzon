@@ -24,27 +24,20 @@ public class ImageServiceImpl implements ImageService {
     public byte[] updateAdsImage(long id, MultipartFile file) {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
         Image oldImage = imageRepository.findById(id).orElseThrow(ImageNotFoundException::new);
-        if (file.isEmpty()) {
-            throw new EmptyFileException();
-        }
-        byte[] imageData;
-        try {
-            imageData = file.getBytes();
-
-        } catch (IOException e) {
-            log.error("Image has some problems and cannot be read");
-            throw new RuntimeException("Problems with uploaded image");
-        }
-        oldImage.setData(imageData);
-        oldImage.setFileSize(file.getSize());
-        oldImage.setMediaType(file.getContentType());
-        imageRepository.save(oldImage);
-        return imageData;
+        extractInfoFromFile(file, oldImage);
+        Image savedImage = imageRepository.save(oldImage);
+        return savedImage.getData();
     }
 
     @Override
     public Image createImage(MultipartFile file, Ads ads) {
         Image imageToSave = new Image();
+        extractInfoFromFile(file, imageToSave);
+        imageToSave.setAds(ads);
+        return imageRepository.save(imageToSave);
+    }
+
+    private static void extractInfoFromFile(MultipartFile file, Image imageToSave) {
         if (file.isEmpty()) {
             throw new EmptyFileException();
         }
@@ -56,9 +49,7 @@ public class ImageServiceImpl implements ImageService {
             throw new RuntimeException("Problems with uploaded image");
         }
         imageToSave.setData(imageData);
-        imageToSave.setMediaType(file.getContentType());
         imageToSave.setFileSize(file.getSize());
-        imageToSave.setAds(ads);
-        return imageRepository.save(imageToSave);
+        imageToSave.setMediaType(file.getContentType());
     }
 }
