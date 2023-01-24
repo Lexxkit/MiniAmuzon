@@ -13,7 +13,7 @@ public class Image {
     private Long id;
     private Long fileSize;
     private String mediaType;
-    @Lob
+
     private byte[] data;
     @ManyToOne
     @JoinColumn(name = "ads_id")
