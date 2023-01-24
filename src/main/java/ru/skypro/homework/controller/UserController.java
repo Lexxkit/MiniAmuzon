@@ -43,7 +43,7 @@ public class UserController {
     public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Was invoked update user image method");
         String username = null; //Change this with username from authorization
-        userService.updateUserImage(username, image);
+        userService.updateUserAvatar(username, image);
         return ResponseEntity.ok().build();
     }
 

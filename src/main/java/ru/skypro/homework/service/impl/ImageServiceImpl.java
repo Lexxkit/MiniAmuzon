@@ -30,6 +30,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Image createImage(MultipartFile file, Ads ads) {
+        log.info("Was invoked createImage method from {}", ImageService.class.getSimpleName());
         Image imageToSave = new Image();
         extractInfoFromFile(file, imageToSave);
         imageToSave.setAds(ads);
@@ -38,13 +39,14 @@ public class ImageServiceImpl implements ImageService {
 
     private void extractInfoFromFile(MultipartFile file, Image imageToSave) {
         if (file.isEmpty()) {
+            log.warn("File '{}' is empty!", file.getOriginalFilename());
             throw new EmptyFileException();
         }
         byte[] imageData;
         try {
             imageData = file.getBytes();
         } catch (IOException e) {
-            log.error("Image has some problems and cannot be read");
+            log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
             throw new RuntimeException("Problems with uploaded image");
         }
         imageToSave.setData(imageData);

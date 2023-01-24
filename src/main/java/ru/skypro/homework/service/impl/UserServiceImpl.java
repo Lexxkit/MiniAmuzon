@@ -8,6 +8,7 @@ import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.EmptyFileException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -44,8 +45,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserImage(String username, MultipartFile file) {
-
+    public void updateUserAvatar(String username, MultipartFile file) {
+        log.info("Was invoked createImage method from {}", UserService.class.getSimpleName());
+        if (file.isEmpty()) {
+            log.warn("File '{}' is empty.", file.getOriginalFilename());
+            throw new EmptyFileException();
+        }
         User testUser = new User(); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
 
         Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
@@ -53,6 +58,7 @@ public class UserServiceImpl implements UserService {
         try {
             avatar.setImage(file.getBytes());
         } catch (IOException e) {
+            log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
             throw new RuntimeException("Problems with uploaded image");
         }
         avatar.setUser(testUser);

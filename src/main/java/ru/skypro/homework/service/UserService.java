@@ -10,5 +10,5 @@ public interface UserService {
 
     UserDto updateUser(UserDto userDto);
 
-    void updateUserImage(String username, MultipartFile file);
+    void updateUserAvatar(String username, MultipartFile file);
 }
