@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
 
@@ -41,12 +42,12 @@ public class AdsController {
             @ApiResponse(responseCode = "403", content = @Content),
             @ApiResponse(responseCode = "404", content = @Content)
     })
-    @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto createAds
-//                                         @RequestPart("image") MultipartFile image
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdsDto> addAds(@RequestPart("properties") CreateAdsDto createAds,
+                                         @RequestPart("image") MultipartFile image
                                          ) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image));
     }
 
     @Operation(summary = "getComments",
