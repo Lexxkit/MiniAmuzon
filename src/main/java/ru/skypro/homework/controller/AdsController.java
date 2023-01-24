@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ import ru.skypro.homework.service.AdsService;
 public class AdsController {
 
     private final AdsService adsService;
+    private final CommentService commentService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
@@ -64,8 +66,7 @@ public class AdsController {
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk") String adPk) {
         log.info("Was invoked get all comments for ad = {} method", adPk);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new ResponseWrapperComment());
+        return ResponseEntity.ok(commentService.getAllCommentsForAdsWithId(getLongFromString(adPk)));
     }
 
     @Operation(summary = "addComments",
@@ -217,5 +218,16 @@ public class AdsController {
         log.info("Was invoked get all ads for current user = {} method", principal);
         // TODO: Получить инфо о авторизованном пользователе и передать в сервис вместо authority
         return ResponseEntity.ok(adsService.getAllAdsForUser(authority));
+    }
+
+    private Long getLongFromString(String adPk) {
+        long id;
+        try {
+            id = Long.parseLong(adPk);
+        } catch (NumberFormatException e) {
+            log.warn("String {} couldn't be parsed to type Long", adPk);
+            throw new RuntimeException("Wrong endpoint");
+        }
+        return id;
     }
 }

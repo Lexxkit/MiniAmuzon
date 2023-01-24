@@ -51,7 +51,8 @@ public class UserServiceImpl implements UserService {
             log.warn("File '{}' is empty.", file.getOriginalFilename());
             throw new EmptyFileException();
         }
-        User testUser = new User(); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
+        // Эту строчку необходимо переписать после изучения работы с авторизацией.
+        User testUser = userRepository.findById(1L).get(); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
 
         Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
 
