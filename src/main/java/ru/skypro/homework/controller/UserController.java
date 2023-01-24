@@ -42,6 +42,8 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Was invoked update user image method");
+        String username = null; //Change this with username from authorization
+        userService.updateUserImage(username, image);
         return ResponseEntity.ok().build();
     }
 

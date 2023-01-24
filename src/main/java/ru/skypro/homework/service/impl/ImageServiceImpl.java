@@ -19,7 +19,6 @@ import java.io.IOException;
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
-    // TODO: 24.01.2023 Extract common parts of methods to a new one!!!
     @Override
     public byte[] updateAdsImage(long id, MultipartFile file) {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
@@ -37,7 +36,7 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.save(imageToSave);
     }
 
-    private static void extractInfoFromFile(MultipartFile file, Image imageToSave) {
+    private void extractInfoFromFile(MultipartFile file, Image imageToSave) {
         if (file.isEmpty()) {
             throw new EmptyFileException();
         }
