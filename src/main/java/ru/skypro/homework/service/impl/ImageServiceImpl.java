@@ -19,7 +19,6 @@ import java.io.IOException;
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
-    // TODO: 24.01.2023 Extract common parts of methods to a new one!!!
     @Override
     public byte[] updateAdsImage(long id, MultipartFile file) {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
@@ -31,21 +30,23 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Image createImage(MultipartFile file, Ads ads) {
+        log.info("Was invoked createImage method from {}", ImageService.class.getSimpleName());
         Image imageToSave = new Image();
         extractInfoFromFile(file, imageToSave);
         imageToSave.setAds(ads);
         return imageRepository.save(imageToSave);
     }
 
-    private static void extractInfoFromFile(MultipartFile file, Image imageToSave) {
+    private void extractInfoFromFile(MultipartFile file, Image imageToSave) {
         if (file.isEmpty()) {
+            log.warn("File '{}' is empty!", file.getOriginalFilename());
             throw new EmptyFileException();
         }
         byte[] imageData;
         try {
             imageData = file.getBytes();
         } catch (IOException e) {
-            log.error("Image has some problems and cannot be read");
+            log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
             throw new RuntimeException("Problems with uploaded image");
         }
         imageToSave.setData(imageData);

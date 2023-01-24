@@ -3,13 +3,18 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.EmptyFileException;
 import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.repository.AvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -17,6 +22,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final AvatarRepository avatarRepository;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -38,8 +44,28 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(response);
     }
 
+    @Override
+    public void updateUserAvatar(String username, MultipartFile file) {
+        log.info("Was invoked createImage method from {}", UserService.class.getSimpleName());
+        if (file.isEmpty()) {
+            log.warn("File '{}' is empty.", file.getOriginalFilename());
+            throw new EmptyFileException();
+        }
+        // Эту строчку необходимо переписать после изучения работы с авторизацией.
+        User testUser = userRepository.findById(1L).get(); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
 
+        Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
 
+        try {
+            avatar.setImage(file.getBytes());
+        } catch (IOException e) {
+            log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
+            throw new RuntimeException("Problems with uploaded image");
+        }
+        avatar.setUser(testUser);
+
+        avatarRepository.save(avatar);
+    }
 
 
 }
