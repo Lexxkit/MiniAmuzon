@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        User user = userRepository.findUserByEmail(userDto.getEmail());
+        User user = userRepository.findUserByEmail(userDto.getEmail()).orElseThrow();
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -72,10 +72,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByEmail(String email) {
-        Optional<User> response = userRepository.findUserByEmail2(email);
-        if (response.isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        User response = userRepository.findUserByEmail(email).orElseThrow();
         return userMapper.userToUserDto(response);
     }
 
