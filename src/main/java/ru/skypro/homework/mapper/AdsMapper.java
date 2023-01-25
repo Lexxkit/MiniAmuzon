@@ -21,10 +21,6 @@ public interface AdsMapper {
     @Mapping(source = "images", target = "image")
     AdsDto adsToAdsDto(Ads ads);
 
-    default String mapImageToString(Image image) {
-        return Arrays.toString(image.getData());
-    }
-
     @Mapping(source = "author", target = "author.id")
     @Mapping(source = "pk", target = "id")
     Ads adsDtoToAds(AdsDto adsDto);
@@ -40,5 +36,10 @@ public interface AdsMapper {
     @Mapping(source = "author.email", target = "email")
     @Mapping(source = "author.phone", target = "phone")
     @Mapping(source = "id", target = "pk")
+    @Mapping(source = "images", target = "image")
     FullAdsDto adsToFullAdsDto(Ads ads);
+
+    default String mapImageToString(Image image) {
+        return Arrays.toString(image.getData());
+    }
 }
