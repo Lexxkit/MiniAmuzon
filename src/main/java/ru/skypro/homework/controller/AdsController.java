@@ -84,10 +84,10 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto comment) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto commentDto) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new CommentDto());
+        CommentDto newComment = commentService.createNewComment(getLongFromString(adPk), commentDto);
+        return ResponseEntity.ok(newComment);
     }
 
     @Operation(summary = "getFullAd",
