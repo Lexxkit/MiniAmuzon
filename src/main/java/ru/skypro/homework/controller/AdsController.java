@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exceptions.BadRequestException;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 
@@ -221,13 +222,11 @@ public class AdsController {
     }
 
     private Long getLongFromString(String adPk) {
-        long id;
         try {
-            id = Long.parseLong(adPk);
+            return Long.parseLong(adPk);
         } catch (NumberFormatException e) {
-            log.warn("String {} couldn't be parsed to type Long", adPk);
-            throw new RuntimeException("Wrong endpoint");
+            log.warn("String '{}' couldn't be parsed to type Long", adPk);
+            throw new BadRequestException();
         }
-        return id;
     }
 }
