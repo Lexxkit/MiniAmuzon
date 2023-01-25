@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exceptions.BadRequestException;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 
@@ -83,10 +84,10 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto comment) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto commentDto) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new CommentDto());
+        CommentDto newComment = commentService.createNewComment(getLongFromString(adPk), commentDto);
+        return ResponseEntity.ok(newComment);
     }
 
     @Operation(summary = "getFullAd",
@@ -221,13 +222,11 @@ public class AdsController {
     }
 
     private Long getLongFromString(String adPk) {
-        long id;
         try {
-            id = Long.parseLong(adPk);
+            return Long.parseLong(adPk);
         } catch (NumberFormatException e) {
-            log.warn("String {} couldn't be parsed to type Long", adPk);
-            throw new RuntimeException("Wrong endpoint");
+            log.warn("String '{}' couldn't be parsed to type Long", adPk);
+            throw new BadRequestException();
         }
-        return id;
     }
 }
