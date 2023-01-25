@@ -33,6 +33,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getUser(@PathVariable String email) {
+        log.info("Was invoked get user by Email method");
+        return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
+
+
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto) {
         log.info("Was invoked update user method");

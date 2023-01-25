@@ -9,6 +9,7 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -16,6 +17,7 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class UserServiceImpl implements UserService {
         List<User> userList = userRepository.findAll();
         return userMapper.userListToResponseWrapperUserDto(userList.size(), userList);
     }
+
 
     @Override
     public UserDto updateUser(UserDto userDto) {
@@ -65,6 +68,15 @@ public class UserServiceImpl implements UserService {
         avatar.setUser(testUser);
 
         avatarRepository.save(avatar);
+    }
+
+    @Override
+    public UserDto getUserByEmail(String email) {
+        Optional<User> response = userRepository.findUserByEmail2(email);
+        if (response.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        return userMapper.userToUserDto(response);
     }
 
 
