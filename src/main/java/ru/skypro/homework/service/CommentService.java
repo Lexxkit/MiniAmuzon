@@ -8,4 +8,11 @@ public interface CommentService {
     ResponseWrapperComment getAllCommentsForAdsWithId(Long adsId);
 
     CommentDto createNewComment(Long adsId, CommentDto commentDto);
+
+    CommentDto getComments(long adPk, long id);
+
+    void deleteComments(long adPk, long id);
+
+    CommentDto updateComments(long adPk, long id, CommentDto commentDto);
+
 }
