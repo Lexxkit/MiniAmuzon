@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
 
@@ -28,17 +27,10 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperUserDto> getUsers() {
-        log.info("Was invoked get all users method");
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
-
-    @GetMapping("/me")
     public ResponseEntity<UserDto> getUser(@PathVariable String email) {
         log.info("Was invoked get user by Email method");
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
-
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto) {
@@ -53,5 +45,4 @@ public class UserController {
         userService.updateUserAvatar(username, image);
         return ResponseEntity.ok().build();
     }
-
 }
