@@ -17,7 +17,6 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,10 +34,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.userListToResponseWrapperUserDto(userList.size(), userList);
     }
 
-
     @Override
     public UserDto updateUser(UserDto userDto) {
-        User user = userRepository.findUserByEmail(userDto.getEmail()).orElseThrow();
+        User user = userRepository.findUserByEmail(userDto.getEmail()).orElseThrow(UserNotFoundException::new);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -55,7 +53,7 @@ public class UserServiceImpl implements UserService {
             throw new EmptyFileException();
         }
         // Эту строчку необходимо переписать после изучения работы с авторизацией.
-        User testUser = userRepository.findById(1L).get(); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
+        User testUser = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
 
         Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
 
@@ -72,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByEmail(String email) {
-        User response = userRepository.findUserByEmail(email).orElseThrow();
+        User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
         return userMapper.userToUserDto(response);
     }
 
