@@ -12,7 +12,6 @@ public class Avatar {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Lob
     private byte[] image;
     @OneToOne
     private User user;

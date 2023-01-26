@@ -10,8 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exceptions.BadRequestException;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ import ru.skypro.homework.service.AdsService;
 public class AdsController {
 
     private final AdsService adsService;
+    private final CommentService commentService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
@@ -41,12 +45,12 @@ public class AdsController {
             @ApiResponse(responseCode = "403", content = @Content),
             @ApiResponse(responseCode = "404", content = @Content)
     })
-    @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto createAds
-//                                         @RequestPart("image") MultipartFile image
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdsDto> addAds(@RequestPart("properties") CreateAdsDto createAds,
+                                         @RequestPart("image") MultipartFile image
                                          ) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image));
     }
 
     @Operation(summary = "getComments",
@@ -63,8 +67,7 @@ public class AdsController {
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk") String adPk) {
         log.info("Was invoked get all comments for ad = {} method", adPk);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new ResponseWrapperComment());
+        return ResponseEntity.ok(commentService.getAllCommentsForAdsWithId(getLongFromString(adPk)));
     }
 
     @Operation(summary = "addComments",
@@ -81,10 +84,10 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto comment) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") String adPk, @RequestBody CommentDto commentDto) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new CommentDto());
+        CommentDto newComment = commentService.createNewComment(getLongFromString(adPk), commentDto);
+        return ResponseEntity.ok(newComment);
     }
 
     @Operation(summary = "getFullAd",
@@ -152,8 +155,7 @@ public class AdsController {
     public ResponseEntity<CommentDto> getComments(@PathVariable("ad_pk") String adPk,
                                                   @PathVariable int id) {
         log.info("Was invoked get ad's comment by id = {} method", id);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new CommentDto());
+        return ResponseEntity.ok(commentService.getComments(getLongFromString(adPk), id));
     }
 
     @Operation(summary = "deleteComments",
@@ -167,7 +169,7 @@ public class AdsController {
     public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") String adPk,
                                                @PathVariable int id) {
         log.info("Was invoked delete ad's comment by id = {} method", id);
-        // TODO: 18.01.2023 add service
+        commentService.deleteComments(getLongFromString(adPk), id);
         return ResponseEntity.ok().build();
     }
 
@@ -189,8 +191,7 @@ public class AdsController {
                                                      @PathVariable int id,
                                                      @RequestBody CommentDto commentDto) {
         log.info("Was invoked update ad's = {} comment by id = {} method", adPk, id);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(commentDto);
+        return ResponseEntity.ok(commentService.updateComments(getLongFromString(adPk), id, commentDto));
     }
 
 
@@ -216,5 +217,14 @@ public class AdsController {
         log.info("Was invoked get all ads for current user = {} method", principal);
         // TODO: Получить инфо о авторизованном пользователе и передать в сервис вместо authority
         return ResponseEntity.ok(adsService.getAllAdsForUser(authority));
+    }
+
+    private Long getLongFromString(String adPk) {
+        try {
+            return Long.parseLong(adPk);
+        } catch (NumberFormatException e) {
+            log.warn("String '{}' couldn't be parsed to type Long", adPk);
+            throw new BadRequestException();
+        }
     }
 }

@@ -74,25 +74,44 @@ Authorization: Basic user password
   "currentPassword": "password1"
 }
 
-###
-POST http://localhost:8080/ads
-Content-Type: application/json
-Authorization: Basic user password
-
-{
-  "image": "123",
-  "price": 123,
-  "description": "123",
-  "pk": 1233,
-  "title": "123"
-}
+####
+#POST http://localhost:8080/ads
+#Content-Type: application/json
+#Authorization: Basic user password
+#
+#{
+#  "image": "123",
+#  "price": 123,
+#  "description": "123",
+#  "pk": 1233,
+#  "title": "123"
+#}
 
 ###
 GET http://localhost:8080/ads
 Content-Type: application/json
 Authorization: Basic user password
 
+###
+POST http://localhost:8080/ads
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
+--WebAppBoundary
+Content-Disposition: form-data; name="properties"
+Content-Type: application/json
+
+{
+  "description" : "Test",
+  "price" : 12,
+  "title": "Title"
+}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="avataaars.png"
+Content-Type: application/octet-stream
+
+< ./avataaars.png
+--WebAppBoundary--
 
 
 
