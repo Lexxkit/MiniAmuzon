@@ -155,8 +155,7 @@ public class AdsController {
     public ResponseEntity<CommentDto> getComments(@PathVariable("ad_pk") String adPk,
                                                   @PathVariable int id) {
         log.info("Was invoked get ad's comment by id = {} method", id);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(new CommentDto());
+        return ResponseEntity.ok(commentService.getComments(getLongFromString(adPk), id));
     }
 
     @Operation(summary = "deleteComments",
@@ -170,7 +169,7 @@ public class AdsController {
     public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") String adPk,
                                                @PathVariable int id) {
         log.info("Was invoked delete ad's comment by id = {} method", id);
-        // TODO: 18.01.2023 add service
+        commentService.deleteComments(getLongFromString(adPk), id);
         return ResponseEntity.ok().build();
     }
 
@@ -192,8 +191,7 @@ public class AdsController {
                                                      @PathVariable int id,
                                                      @RequestBody CommentDto commentDto) {
         log.info("Was invoked update ad's = {} comment by id = {} method", adPk, id);
-        // TODO: 18.01.2023 add service
-        return ResponseEntity.ok(commentDto);
+        return ResponseEntity.ok(commentService.updateComments(getLongFromString(adPk), id, commentDto));
     }
 
 
