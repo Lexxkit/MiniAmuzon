@@ -28,6 +28,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    /**
+     * Receive all users
+     * The repository method is being used{@link UserRepository#findAll()}
+     *
+     * @return all users
+     */
     @Override
     public ResponseWrapperUserDto getAllUsers() {
         log.info("Was invoked findAllUsers method from ");
@@ -36,6 +42,12 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    /**
+     * Method for editing a user and saving it to DB
+     *
+     * @param userDto
+     * @return
+     */
     @Override
     public UserDto updateUser(UserDto userDto) {
         User user = userRepository.findUserByEmail(userDto.getEmail()).orElseThrow();
@@ -75,6 +87,4 @@ public class UserServiceImpl implements UserService {
         User response = userRepository.findUserByEmail(email).orElseThrow();
         return userMapper.userToUserDto(response);
     }
-
-
 }
