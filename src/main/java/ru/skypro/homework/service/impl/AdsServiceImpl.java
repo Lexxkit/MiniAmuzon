@@ -114,7 +114,11 @@ public class AdsServiceImpl implements AdsService {
     }
 
     private static void checkIfUserHasPermission(Authentication authentication, Ads ads) {
-        if (!authentication.getName().equals(ads.getAuthor().getEmail())){
+        boolean matchRole = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+        boolean matchUser = authentication.getName().equals(ads.getAuthor().getEmail());
+
+        if (!matchRole || !matchUser){
             throw new RuntimeException("403 Forbidden");
         }
     }
