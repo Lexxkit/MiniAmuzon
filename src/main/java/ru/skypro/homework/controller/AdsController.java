@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -48,10 +49,11 @@ public class AdsController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> addAds(@RequestPart("properties") CreateAdsDto createAds,
-                                         @RequestPart("image") MultipartFile image
+                                         @RequestPart("image") MultipartFile image,
+                                         Authentication authentication
                                          ) {
         log.info("Was invoked add ad method");
-        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image, authentication));
     }
 
     @Operation(summary = "getComments",
@@ -119,9 +121,10 @@ public class AdsController {
             })
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeAds(@PathVariable int id) {
+    public ResponseEntity<Void> removeAds(@PathVariable int id,
+                                          Authentication authentication) {
         log.info("Was invoked delete ad by id = {} method", id);
-        adsService.removeAds(id);
+        adsService.removeAds(id, authentication);
         return ResponseEntity.noContent().build();
     }
 
@@ -141,9 +144,10 @@ public class AdsController {
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{id}")
     public ResponseEntity<AdsDto> updateAds(@PathVariable int id,
-                                            @RequestBody CreateAdsDto createAdsDto) {
+                                            @RequestBody CreateAdsDto createAdsDto,
+                                            Authentication authentication) {
         log.info("Was invoked update ad by id = {} method", id);
-        return ResponseEntity.ok(adsService.updateAdsById(id, createAdsDto));
+        return ResponseEntity.ok(adsService.updateAdsById(id, createAdsDto, authentication));
     }
 
     @Operation(summary = "getComments",
@@ -223,9 +227,10 @@ public class AdsController {
                                                        @RequestParam(value = "authorities[0].authority", required = false) String authority,
                                                        @RequestParam(value = "credentials", required = false) Object credentials,
                                                        @RequestParam(value = "details", required = false) Object details,
-                                                       @RequestParam(value = "principal", required = false) Object principal) {
-        log.info("Was invoked get all ads for current user = {} method", principal);
-        // TODO: Получить инфо о авторизованном пользователе и передать в сервис вместо authority
-        return ResponseEntity.ok(adsService.getAllAdsForUser(authority));
+                                                       @RequestParam(value = "principal", required = false) Object principal,
+                                                       Authentication authentication) {
+        log.info("Was invoked get all ads for current user = {} method", authentication.getName());
+        log.info("{}", authentication.getAuthorities());
+        return ResponseEntity.ok(adsService.getAllAdsForUser(authentication.getName()));
     }
 }

@@ -86,7 +86,7 @@ class AdsServiceImplTest {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
         when(imageService.createImage(any(), any())).thenReturn(new Image());
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
-        AdsDto result = out.createAds(createAdsDto, null);
+        AdsDto result = out.createAds(createAdsDto, null, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo(createAdsDto.getTitle());
