@@ -73,6 +73,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public FullAdsDto getFullAdsById(long id) {
+        log.info("Was invoked getFullAdsById method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
         return adsMapper.adsToFullAdsDto(ads);
     }
@@ -86,6 +87,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public void removeAds(long id, Authentication authentication) {
+        log.info("Was invoked removeAds method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
         checkIfUserHasPermission(authentication, ads);
         adsRepository.delete(ads);
@@ -101,6 +103,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
+        log.info("Was invoked updateAdsById method from {}", AdsService.class.getSimpleName());
         Ads oldAds = getAdsById(id);
         checkIfUserHasPermission(authentication, oldAds);
         Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
@@ -119,6 +122,7 @@ public class AdsServiceImpl implements AdsService {
         boolean matchUser = authentication.getName().equals(ads.getAuthor().getEmail());
 
         if (!matchRole || !matchUser){
+            log.warn("Current user has NO permission!");
             throw new RuntimeException("403 Forbidden");
         }
     }
@@ -131,6 +135,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public ResponseWrapperAds getAllAdsForUser(String username) {
+        log.info("Was invoked getAllAdsForUser method from {}", AdsService.class.getSimpleName());
         List<Ads> userAdsList = adsRepository.findAdsByAuthorEmail(username);
         return adsMapper.adsListToResponseWrapperAds(userAdsList.size(), userAdsList);
     }
@@ -144,6 +149,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Override
     public Ads getAdsById(long id) {
+        log.info("Was invoked getAdsById method from {}", AdsService.class.getSimpleName());
         return adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
     }
 }

@@ -11,6 +11,8 @@ import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
+import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.CommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.mapper.CommentMapperImpl;
 import ru.skypro.homework.repository.CommentRepository;
@@ -19,8 +21,10 @@ import ru.skypro.homework.service.impl.CommentServiceImpl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -39,9 +43,14 @@ public class CommentServiceImplTest {
     private Ads testAds;
     private Comment testComment;
     private CommentDto testCommentDto;
+    private User testUser;
 
     @BeforeEach
     void init() {
+        testUser = new User();
+        testUser.setId(42L);
+        testUser.setEmail("test@test.com");
+
         testAds = new Ads();
         testAds.setId(1L);
         testAds.setPrice(new BigDecimal(10));
@@ -79,5 +88,23 @@ public class CommentServiceImplTest {
         assertThat(result.getText()).isEqualTo(testCommentDto.getText());
         assertThat(result.getCreatedAt()).isEqualTo(testCommentDto.getCreatedAt());
         assertThat(result.getPk()).isEqualTo(testCommentDto.getPk());
+    }
+
+    @Test
+    void shouldReturnCommentDto_WhenGetCommentsWithIdAndAuthorId() {
+        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.of(testComment));
+        CommentDto result = out.getComments(testComment.getId(), testUser.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getPk()).isEqualTo(testCommentDto.getPk());
+        assertThat(result.getCreatedAt()).isEqualTo(testCommentDto.getCreatedAt());
+    }
+
+    @Test
+    void shouldThrowCommentNotFoundException_WhenGetCommentsWithWrongIdAndAuthorId() {
+        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.empty());
+
+        assertThatExceptionOfType(CommentNotFoundException.class)
+                .isThrownBy(() -> out.getComments(testComment.getId(), testUser.getId()));
     }
 }
