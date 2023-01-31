@@ -2,13 +2,11 @@ package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.skypro.homework.entity.User;
+import ru.skypro.homework.entity.Avatar;
 
 import java.util.Optional;
 
-
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-
-   Optional<User> findUserByEmail(String email);
+public interface AvatarRepository extends JpaRepository<Avatar, Long> {
+    Optional<Avatar> findByUserId(Long userId);
 }

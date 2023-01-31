@@ -21,6 +21,6 @@ public class Ads {
     private User author;
     @OneToMany(mappedBy = "ads")
     private List<Comment> comments;
-    @OneToMany(mappedBy = "ads")
+    @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER)
     private List<Image> images;
 }

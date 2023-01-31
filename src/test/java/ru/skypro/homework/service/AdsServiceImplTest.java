@@ -12,6 +12,7 @@ import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
+import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.AdsNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
@@ -32,6 +33,8 @@ import static org.mockito.Mockito.when;
 class AdsServiceImplTest {
     @Mock
     private AdsRepository adsRepository;
+    @Mock
+    private ImageService imageService;
     @Spy
     private AdsMapper adsMapper = new AdsMapperImpl();
     @InjectMocks
@@ -81,6 +84,7 @@ class AdsServiceImplTest {
     @Test
     void shouldReturnAdsDto_WhenCreateAds() {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
+        when(imageService.createImage(any(), any())).thenReturn(new Image());
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
         AdsDto result = out.createAds(createAdsDto, null);
 

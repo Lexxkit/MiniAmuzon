@@ -9,6 +9,7 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
@@ -17,6 +18,8 @@ public interface UserMapper {
     UserDto userToUserDto(User user);
 
     User userDtoToUser(UserDto userDto);
+
+    UserDto userToUserDto(Optional<User> user);
 
     @Mapping(source = "size", target = "count")
     @Mapping(source = "userList", target = "results")
