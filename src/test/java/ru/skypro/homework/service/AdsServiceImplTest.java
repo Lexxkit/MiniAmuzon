@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
@@ -17,6 +19,8 @@ import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.AdsNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.mapper.AdsMapperImpl;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.mapper.UserMapperImpl;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
@@ -35,8 +39,12 @@ class AdsServiceImplTest {
     private AdsRepository adsRepository;
     @Mock
     private ImageService imageService;
+    @Mock
+    private UserService userService;
     @Spy
     private AdsMapper adsMapper = new AdsMapperImpl();
+    @Spy
+    private UserMapper userMapper = new UserMapperImpl();
     @InjectMocks
     private AdsServiceImpl out;
 
@@ -45,10 +53,14 @@ class AdsServiceImplTest {
     private Ads ads2;
     private CreateAdsDto createAdsDto;
     private User testUser;
+    private Authentication auth;
+
     @BeforeEach
     void init() {
         testUser = new User();
         testUser.setId(42L);
+        testUser.setEmail("test@test.com");
+        auth = new UsernamePasswordAuthenticationToken(testUser, null);
 
         createAdsDto = new CreateAdsDto();
         createAdsDto.setDescription("Test description");
@@ -86,7 +98,8 @@ class AdsServiceImplTest {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
         when(imageService.createImage(any(), any())).thenReturn(new Image());
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
-        AdsDto result = out.createAds(createAdsDto, null);
+        when(userService.getUserByEmail(any(String.class))).thenReturn(null);
+        AdsDto result = out.createAds(createAdsDto, null, auth);
 
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo(createAdsDto.getTitle());

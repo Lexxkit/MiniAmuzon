@@ -7,17 +7,13 @@ import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
-import ru.skypro.homework.exceptions.AdsNotFoundException;
 import ru.skypro.homework.exceptions.CommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
-import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -63,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateComments(long adPk, long id, CommentDto commentDto){
         Comment comment = commentRepository.findCommentByIdAndAuthorId(adPk, id)
                 .orElseThrow(CommentNotFoundException::new);
+        // TODO: 31.01.2023 Исправить на (commentDto.getText())
         comment.setText(comment.getText());
         commentRepository.save(comment);
         return commentMapper.commentToCommentDto(comment);

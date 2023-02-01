@@ -8,7 +8,7 @@ public interface UserService {
 
     ResponseWrapperUserDto getAllUsers();
 
-    UserDto updateUser(UserDto userdto);
+    UserDto updateUser(UserDto userdto, String name);
 
     void updateUserAvatar(String username, MultipartFile file);
 
