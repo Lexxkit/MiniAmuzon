@@ -2,9 +2,11 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
@@ -85,5 +87,15 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByEmail(String email) {
         User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
         return userMapper.userToUserDto(response);
+    }
+
+    @Override
+    public void checkIfUserHasPermission(Authentication authentication) {
+        boolean matchRole = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+        if (!matchRole){
+            log.warn("Current user has NO permission!");
+            throw new RuntimeException("403 Forbidden");
+        }
     }
 }
