@@ -89,7 +89,8 @@ public class AdsServiceImpl implements AdsService {
     public void removeAds(long id, Authentication authentication) {
         log.info("Was invoked removeAds method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
-        checkIfUserHasPermission(authentication, ads);
+        userService.checkIfUserHasPermission(authentication);
+        checkIfAdsMatchUser(authentication, ads);
         adsRepository.delete(ads);
     }
 
@@ -105,7 +106,8 @@ public class AdsServiceImpl implements AdsService {
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Was invoked updateAdsById method from {}", AdsService.class.getSimpleName());
         Ads oldAds = getAdsById(id);
-        checkIfUserHasPermission(authentication, oldAds);
+        userService.checkIfUserHasPermission(authentication);
+        checkIfAdsMatchUser(authentication, oldAds);
         Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
 
         oldAds.setPrice(infoToUpdate.getPrice());
@@ -116,13 +118,11 @@ public class AdsServiceImpl implements AdsService {
         return adsMapper.adsToAdsDto(updatedAds);
     }
 
-    private static void checkIfUserHasPermission(Authentication authentication, Ads ads) {
-        boolean matchRole = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+    private static void checkIfAdsMatchUser(Authentication authentication, Ads ads) {
         boolean matchUser = authentication.getName().equals(ads.getAuthor().getEmail());
 
-        if (!matchRole || !matchUser){
-            log.warn("Current user has NO permission!");
+        if (!matchUser){
+            log.warn("Current Ads isn't of authentication user!");
             throw new RuntimeException("403 Forbidden");
         }
     }

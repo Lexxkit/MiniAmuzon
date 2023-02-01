@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
@@ -12,6 +13,7 @@ import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.UserService;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final AdsService adsService;
     private final CommentMapper commentMapper;
     private final CommentRepository commentRepository;
+    private final UserService userService;
 
     @Override
     public ResponseWrapperComment getAllCommentsForAdsWithId(Long adsId) {
@@ -43,25 +46,42 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto getComments(long adPk, long id) {
-        Comment comment = commentRepository.findCommentByIdAndAuthorId(adPk, id)
-                .orElseThrow(CommentNotFoundException::new);
+        Comment comment = getCommentByIdAndAuthorId(adPk,id);
         return commentMapper.commentToCommentDto(comment);
     }
 
     @Override
-    public void deleteComments (long adPk, long id) {
-        Comment comment = commentRepository.findCommentByIdAndAuthorId(adPk, id)
-                .orElseThrow(CommentNotFoundException::new);
+    public void deleteComments (long adPk, long id,  Authentication authentication) {
+        Comment comment = getCommentByIdAndAuthorId(adPk, id);
+        userService.checkIfUserHasPermission(authentication);
+        checkIfCommentMatchUser(authentication, comment);
         commentRepository.delete(comment);
     }
 
     @Override
-    public CommentDto updateComments(long adPk, long id, CommentDto commentDto){
-        Comment comment = commentRepository.findCommentByIdAndAuthorId(adPk, id)
-                .orElseThrow(CommentNotFoundException::new);
-        // TODO: 31.01.2023 Исправить на (commentDto.getText())
-        comment.setText(comment.getText());
+    public CommentDto updateComments(long adPk, long id, CommentDto commentDto, Authentication authentication){
+        Comment comment = getCommentByIdAndAuthorId(adPk, id);
+        userService.checkIfUserHasPermission(authentication);
+        checkIfCommentMatchUser(authentication, comment);
+        comment.setText(commentDto.getText());
         commentRepository.save(comment);
         return commentMapper.commentToCommentDto(comment);
     }
+
+    @Override
+    public Comment getCommentByIdAndAuthorId(long adPk, long id) {
+        log.info("Was invoked getCommentByIdAndAuthorId method from {}", CommentService.class.getSimpleName());
+        return commentRepository.findCommentByIdAndAuthorId(adPk,id)
+                .orElseThrow(CommentNotFoundException::new);
+    }
+
+    private static void checkIfCommentMatchUser(Authentication authentication, Comment comment) {
+        boolean matchUser = authentication.getName().equals(comment.getAuthor().getEmail());
+
+        if (!matchUser){
+            log.warn("Current Comment isn't of authentication user!");
+            throw new RuntimeException("403 Forbidden");
+        }
+    }
+
 }
