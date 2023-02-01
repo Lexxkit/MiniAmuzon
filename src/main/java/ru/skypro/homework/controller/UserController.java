@@ -36,9 +36,10 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto,
+                                              Authentication authentication) {
         log.info("Was invoked update user method");
-        return ResponseEntity.ok(userService.updateUser(dto));
+        return ResponseEntity.ok(userService.updateUser(dto, authentication.getName()));
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

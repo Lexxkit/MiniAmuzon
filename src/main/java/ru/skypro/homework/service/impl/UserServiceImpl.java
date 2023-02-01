@@ -44,11 +44,12 @@ public class UserServiceImpl implements UserService {
      * Method for editing a user and saving it to DB
      *
      * @param userDto
+     * @param username
      * @return
      */
     @Override
-    public UserDto updateUser(UserDto userDto) {
-        User user = userRepository.findUserByEmail(userDto.getEmail()).orElseThrow(UserNotFoundException::new);
+    public UserDto updateUser(UserDto userDto, String username) {
+        User user = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
