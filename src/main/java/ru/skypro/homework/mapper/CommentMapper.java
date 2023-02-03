@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.skypro.homework.dto.CommentDto;
+import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Comment;
 
 import java.util.List;
@@ -15,11 +16,15 @@ public interface CommentMapper {
 
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.id", target = "author")
-    CommentDto commentToAdsCommentDto(Comment comment);
+    CommentDto commentToCommentDto(Comment comment);
 
     @Mapping(source = "pk", target = "id")
     @Mapping(source = "author", target = "author.id")
-    Comment CommentDtoToComment(CommentDto commentDto);
+    Comment commentDtoToComment(CommentDto commentDto);
 
-    List<Comment> commentToAdsCommentDto(List<Comment> commentList);
+    List<Comment> commentToCommentDto(List<Comment> commentList);
+
+    @Mapping(source = "size", target = "count")
+    @Mapping(source = "commentList", target = "results")
+    ResponseWrapperComment commentsListToResponseWrapperComment(Integer size, List<Comment> commentList);
 }

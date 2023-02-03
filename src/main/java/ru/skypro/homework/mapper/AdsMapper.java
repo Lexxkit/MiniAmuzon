@@ -9,13 +9,16 @@ import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
+import ru.skypro.homework.entity.Image;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsMapper {
     @Mapping(source = "author.id", target = "author")
     @Mapping(source = "id", target = "pk")
+    @Mapping(source = "images", target = "image")
     AdsDto adsToAdsDto(Ads ads);
 
     @Mapping(source = "author", target = "author.id")
@@ -33,5 +36,10 @@ public interface AdsMapper {
     @Mapping(source = "author.email", target = "email")
     @Mapping(source = "author.phone", target = "phone")
     @Mapping(source = "id", target = "pk")
+    @Mapping(source = "images", target = "image")
     FullAdsDto adsToFullAdsDto(Ads ads);
+
+    default String mapImageToString(Image image) {
+        return Arrays.toString(image.getData());
+    }
 }

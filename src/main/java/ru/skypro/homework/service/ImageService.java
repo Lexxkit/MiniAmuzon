@@ -1,9 +1,11 @@
 package ru.skypro.homework.service;
 
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import ru.skypro.homework.entity.Ads;
+import ru.skypro.homework.entity.Image;
 
 public interface ImageService {
-    byte[] updateAdsImage(long id, MultipartFile file) throws IOException;
+    byte[] updateAdsImage(long id, MultipartFile file);
+
+    Image createImage(MultipartFile image, Ads ads);
 }
