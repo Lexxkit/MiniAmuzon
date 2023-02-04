@@ -89,8 +89,8 @@ public class AdsServiceImpl implements AdsService {
     public void removeAds(long id, Authentication authentication) {
         log.info("Was invoked removeAds method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
-        userService.checkIfUserHasPermission(authentication);
-        checkIfAdsMatchUser(authentication, ads);
+
+        checkIfUserCanAlterAds(authentication, ads);
         adsRepository.delete(ads);
     }
 
@@ -106,8 +106,8 @@ public class AdsServiceImpl implements AdsService {
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Was invoked updateAdsById method from {}", AdsService.class.getSimpleName());
         Ads oldAds = getAdsById(id);
-        userService.checkIfUserHasPermission(authentication);
-        checkIfAdsMatchUser(authentication, oldAds);
+
+        checkIfUserCanAlterAds(authentication, oldAds);
         Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
 
         oldAds.setPrice(infoToUpdate.getPrice());
@@ -118,10 +118,11 @@ public class AdsServiceImpl implements AdsService {
         return adsMapper.adsToAdsDto(updatedAds);
     }
 
-    private static void checkIfAdsMatchUser(Authentication authentication, Ads ads) {
+    private void checkIfUserCanAlterAds(Authentication authentication, Ads ads) {
         boolean matchUser = authentication.getName().equals(ads.getAuthor().getEmail());
+        boolean userIsAdmin = userService.checkIfUserIsAdmin(authentication);
 
-        if (!matchUser){
+        if (!(userIsAdmin || matchUser)){
             log.warn("Current Ads isn't of authentication user!");
             throw new RuntimeException("403 Forbidden");
         }

@@ -90,12 +90,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void checkIfUserHasPermission(Authentication authentication) {
-        boolean matchRole = authentication.getAuthorities().stream()
+    public boolean checkIfUserIsAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
-        if (!matchRole){
-            log.warn("Current user has NO permission!");
-            throw new RuntimeException("403 Forbidden");
-        }
     }
 }

@@ -53,16 +53,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComments (long adPk, long id,  Authentication authentication) {
         Comment comment = getCommentByIdAndAuthorId(adPk, id);
-        userService.checkIfUserHasPermission(authentication);
-        checkIfCommentMatchUser(authentication, comment);
+
+        checkIfUserCanAlterComment(authentication, comment);
         commentRepository.delete(comment);
     }
 
     @Override
     public CommentDto updateComments(long adPk, long id, CommentDto commentDto, Authentication authentication){
         Comment comment = getCommentByIdAndAuthorId(adPk, id);
-        userService.checkIfUserHasPermission(authentication);
-        checkIfCommentMatchUser(authentication, comment);
+
+        checkIfUserCanAlterComment(authentication, comment);
         comment.setText(commentDto.getText());
         commentRepository.save(comment);
         return commentMapper.commentToCommentDto(comment);
@@ -75,10 +75,11 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(CommentNotFoundException::new);
     }
 
-    private static void checkIfCommentMatchUser(Authentication authentication, Comment comment) {
+    private void checkIfUserCanAlterComment(Authentication authentication, Comment comment) {
         boolean matchUser = authentication.getName().equals(comment.getAuthor().getEmail());
+        boolean userIsAdmin = userService.checkIfUserIsAdmin(authentication);
 
-        if (!matchUser){
+        if (!(userIsAdmin || matchUser)){
             log.warn("Current Comment isn't of authentication user!");
             throw new RuntimeException("403 Forbidden");
         }
