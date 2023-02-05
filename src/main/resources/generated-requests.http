@@ -95,6 +95,7 @@ Authorization: Basic user password
 ###
 POST http://localhost:8080/ads
 Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Basic user@gmail.com password
 
 --WebAppBoundary
 Content-Disposition: form-data; name="properties"
