@@ -15,5 +15,5 @@ public interface UserService {
 
     UserDto getUserByEmail(String email);
 
-    boolean checkIfUserIsAdmin(Authentication authentication);
+    void checkIfUserHasPermissionToAlter(Authentication authentication, String username);
 }
