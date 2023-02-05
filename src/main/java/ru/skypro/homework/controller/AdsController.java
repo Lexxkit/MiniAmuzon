@@ -179,9 +179,10 @@ public class AdsController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<Void> deleteComments(@PathVariable("ad_pk") long adPk,
-                                               @PathVariable int id) {
+                                               @PathVariable int id,
+                                               Authentication authentication) {
         log.info("Was invoked delete ad's comment by id = {} method", id);
-        commentService.deleteComments(adPk, id);
+        commentService.deleteComments(adPk, id, authentication);
         return ResponseEntity.ok().build();
     }
 
@@ -202,9 +203,10 @@ public class AdsController {
     @PatchMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<CommentDto> updateComments(@PathVariable("ad_pk") long adPk,
                                                      @PathVariable int id,
-                                                     @RequestBody CommentDto commentDto) {
+                                                     @RequestBody CommentDto commentDto,
+                                                     Authentication authentication) {
         log.info("Was invoked update ad's = {} comment by id = {} method", adPk, id);
-        return ResponseEntity.ok(commentService.updateComments(adPk, id, commentDto));
+        return ResponseEntity.ok(commentService.updateComments(adPk, id, commentDto, authentication));
     }
 
 

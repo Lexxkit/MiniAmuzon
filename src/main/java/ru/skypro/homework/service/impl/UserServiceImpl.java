@@ -2,13 +2,16 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AvatarRepository;
@@ -85,5 +88,17 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByEmail(String email) {
         User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
         return userMapper.userToUserDto(response);
+    }
+
+    @Override
+    public void checkIfUserHasPermissionToAlter(Authentication authentication, String username) {
+        boolean matchUser = authentication.getName().equals(username);
+        boolean userIsAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+
+        if (!(userIsAdmin || matchUser)){
+            log.warn("Current user has NO rights to perform this operation.");
+            throw new UserHasNoRightsException("Current user has NO rights to perform this operation.");
+        }
     }
 }
