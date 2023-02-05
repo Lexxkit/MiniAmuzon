@@ -55,7 +55,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     public AdsDto createAds(CreateAdsDto createAdsDto, MultipartFile image, Authentication authentication) {
         log.info("Was invoked createAds method from {}", AdsService.class.getSimpleName());
-        UserDto currentUserDto = userService.getUserByEmail(authentication.getName());
+        UserDto currentUserDto = userService.getUserDtoByUsername(authentication.getName());
         Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
         ads.setAuthor(userMapper.userDtoToUser(currentUserDto));
         Ads savedAds = adsRepository.save(ads);
@@ -90,7 +90,7 @@ public class AdsServiceImpl implements AdsService {
         log.info("Was invoked removeAds method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
 
-        userService.checkIfUserHasPermissionToAlter(authentication, ads.getAuthor().getEmail());
+        userService.checkIfUserHasPermissionToAlter(authentication, ads.getAuthor().getUsername());
         adsRepository.delete(ads);
     }
 
@@ -106,7 +106,7 @@ public class AdsServiceImpl implements AdsService {
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Was invoked updateAdsById method from {}", AdsService.class.getSimpleName());
         Ads oldAds = getAdsById(id);
-        userService.checkIfUserHasPermissionToAlter(authentication, oldAds.getAuthor().getEmail());
+        userService.checkIfUserHasPermissionToAlter(authentication, oldAds.getAuthor().getUsername());
         Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
 
         oldAds.setPrice(infoToUpdate.getPrice());
@@ -126,7 +126,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public ResponseWrapperAds getAllAdsForUser(String username) {
         log.info("Was invoked getAllAdsForUser method from {}", AdsService.class.getSimpleName());
-        List<Ads> userAdsList = adsRepository.findAdsByAuthorEmail(username);
+        List<Ads> userAdsList = adsRepository.findAdsByAuthorUsername(username);
         return adsMapper.adsListToResponseWrapperAds(userAdsList.size(), userAdsList);
     }
 

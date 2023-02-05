@@ -54,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComments (long adPk, long id,  Authentication authentication) {
         Comment comment = getCommentByIdAndAuthorId(adPk, id);
 
-        userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getEmail());
+        userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getUsername());
         commentRepository.delete(comment);
     }
 
@@ -62,7 +62,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateComments(long adPk, long id, CommentDto commentDto, Authentication authentication){
         Comment comment = getCommentByIdAndAuthorId(adPk, id);
 
-        userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getEmail());
+        userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getUsername());
         comment.setText(commentDto.getText());
         commentRepository.save(comment);
         return commentMapper.commentToCommentDto(comment);

@@ -33,7 +33,7 @@ public interface AdsMapper {
 
     @Mapping(source = "author.firstName", target = "authorFirstName")
     @Mapping(source = "author.lastName", target = "authorLastName")
-    @Mapping(source = "author.email", target = "email")
+    @Mapping(source = "author.username", target = "email")
     @Mapping(source = "author.phone", target = "phone")
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "images", target = "image")

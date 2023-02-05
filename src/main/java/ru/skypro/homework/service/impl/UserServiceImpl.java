@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto updateUser(UserDto userDto, String username) {
-        User user = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new);
+        User user = getUser(username);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
             log.warn("File '{}' is empty.", file.getOriginalFilename());
             throw new EmptyFileException();
         }
-        // Эту строчку необходимо переписать после изучения работы с авторизацией.
-        User testUser = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
+
+        User testUser = getUser(username);
 
         Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
 
@@ -85,8 +85,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByEmail(String email) {
-        User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
+    public User getUser(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public UserDto getUserDtoByUsername(String username) {
+        User response = getUser(username);
         return userMapper.userToUserDto(response);
     }
 

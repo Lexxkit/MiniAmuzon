@@ -59,7 +59,7 @@ class AdsServiceImplTest {
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
         auth = new UsernamePasswordAuthenticationToken(testUser, null);
 
         createAdsDto = new CreateAdsDto();
@@ -98,7 +98,7 @@ class AdsServiceImplTest {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
         when(imageService.createImage(any(), any())).thenReturn(new Image());
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
-        when(userService.getUserByEmail(any(String.class))).thenReturn(null);
+        when(userService.getUserDtoByUsername(any(String.class))).thenReturn(null);
         AdsDto result = out.createAds(createAdsDto, null, auth);
 
         assertThat(result).isNotNull();
@@ -127,7 +127,7 @@ class AdsServiceImplTest {
 
     @Test
     void shouldReturnResponseWrapperAdsForUser_whenGetAllAdsForUser() {
-        when(adsRepository.findAdsByAuthorEmail(any(String.class))).thenReturn(adsList);
+        when(adsRepository.findAdsByAuthorUsername(any(String.class))).thenReturn(adsList);
         ResponseWrapperAds result = out.getAllAdsForUser("Username");
 
         assertThat(result).isNotNull();

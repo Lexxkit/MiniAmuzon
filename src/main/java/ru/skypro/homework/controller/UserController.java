@@ -32,7 +32,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUser(Authentication authentication) {
         log.info("Was invoked get user by Email method");
-        return ResponseEntity.ok(userService.getUserByEmail(authentication.getName()));
+        return ResponseEntity.ok(userService.getUserDtoByUsername(authentication.getName()));
     }
 
     @PatchMapping("/me")
