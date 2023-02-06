@@ -8,14 +8,14 @@ import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsMapper {
     @Mapping(source = "author.id", target = "author")
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "ads", target = "image", qualifiedByName = "getImageLink")
+    @Mapping(source = "images", target = "image", qualifiedByName = "getListOfImageLinks")
     AdsDto adsToAdsDto(Ads ads);
 
     @Mapping(source = "author", target = "author.id")
@@ -33,12 +33,12 @@ public interface AdsMapper {
     @Mapping(source = "author.username", target = "email")
     @Mapping(source = "author.phone", target = "phone")
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "ads", target = "image", qualifiedByName = "getImageLink")
+    @Mapping(source = "images", target = "image", qualifiedByName = "getListOfImageLinks")
     FullAdsDto adsToFullAdsDto(Ads ads);
 
-    @Named("getImageLink")
-    default String getImageLink(Ads ads) {
-        Image adsImage = ads.getRandomAdsImage();
-        return (adsImage == null) ? null : "/image/" + adsImage.getId().toString();
+    @Named("getListOfImageLinks")
+    default List<String> getListOfImageLinks(List<Image> images) {
+        return (images == null || images.isEmpty()) ? null :
+                images.stream().map(i -> "/image/" + i.getId()).collect(Collectors.toList());
     }
 }

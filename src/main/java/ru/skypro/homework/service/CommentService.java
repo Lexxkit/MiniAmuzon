@@ -17,5 +17,6 @@ public interface CommentService {
 
     CommentDto updateComments(long adPk, long id, CommentDto commentDto, Authentication authentication);
 
-    Comment getCommentByIdAndAuthorId(long adPk, long id);
+    Comment getCommentById(long id);
 }
+
