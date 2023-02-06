@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 @Slf4j
@@ -21,12 +22,14 @@ import ru.skypro.homework.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestParam(value = "currentPassword", required = false) String currentPassword,
-                                                      @RequestParam(value = "newPassword", required = false) String newPassword ) {
+    public ResponseEntity<Void> setPassword(@RequestBody NewPasswordDto newPasswordDto,
+                                                      Authentication authentication) {
         log.info("Was invoked set password for user method");
-        return ResponseEntity.ok(new NewPasswordDto());
+        authService.changePassword(newPasswordDto, authentication);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")

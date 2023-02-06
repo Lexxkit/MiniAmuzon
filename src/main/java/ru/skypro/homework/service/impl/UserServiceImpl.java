@@ -31,10 +31,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     /**
-     * Receive all users
-     * The repository method is being used{@link UserRepository#findAll()}
+     * Receive all users from the DB.
+     * The repository method {@link UserRepository#findAll()} is used.
      *
-     * @return all users
+     * @return {@link ResponseWrapperUserDto} with the number of users and list of {@link UserDto}
      */
     @Override
     public ResponseWrapperUserDto getAllUsers() {
@@ -44,11 +44,11 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Method for editing a user and saving it to DB
+     * Update current user with new information.
      *
-     * @param userDto
-     * @param username
-     * @return
+     * @param userDto dto from a client with new information
+     * @param username name to find a user in the DB
+     * @return {@link UserDto} with updated information
      */
     @Override
     public UserDto updateUser(UserDto userDto, String username) {
@@ -61,6 +61,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(response);
     }
 
+    /**
+     * Update user's avatar or create a new one from a file.
+     *
+     * @param username name to find a user in the DB
+     * @param file {@link MultipartFile} with the image to save
+     */
     @Override
     public void updateUserAvatar(String username, MultipartFile file) {
         log.info("Was invoked createImage method from {}", UserService.class.getSimpleName());
@@ -84,6 +90,12 @@ public class UserServiceImpl implements UserService {
         avatarRepository.save(avatar);
     }
 
+    /**
+     * Return a {@link User} by its username from the DB.
+     * @param username name to find a user in the DB
+     * @return {@link User} entity
+     * @throws UserNotFoundException if user was not found
+     */
     @Override
     public User getUser(String username) {
         return userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
@@ -95,6 +107,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(response);
     }
 
+    /**
+     * Check if username from {@link Authentication#getName()} and username equals
+     * OR if user has role ADMIN. Throws exception if none of the conditions are true.
+     * @param authentication {@link Authentication} instance from controller
+     * @param username name of a user
+     * @throws UserHasNoRightsException
+     */
     @Override
     public void checkIfUserHasPermissionToAlter(Authentication authentication, String username) {
         boolean matchUser = authentication.getName().equals(username);

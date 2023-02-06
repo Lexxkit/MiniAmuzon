@@ -1,13 +1,16 @@
 package ru.skypro.homework.service.impl;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
@@ -35,8 +38,8 @@ public class AuthServiceImpl implements AuthService {
     /**
      * Check if user can log in
      *
-     * @param userName - username from a client
-     * @param password - password from a client
+     * @param userName username from a client
+     * @param password password from a client
      * @return boolean result of login
      */
     @Override
@@ -53,8 +56,8 @@ public class AuthServiceImpl implements AuthService {
     /**
      * New user registration
      *
-     * @param registerReqDto - new user credentials from a client
-     * @param role - user role
+     * @param registerReqDto new user credentials from a client
+     * @param role user role
      * @return boolean result of registration
      */
     @Override
@@ -80,5 +83,25 @@ public class AuthServiceImpl implements AuthService {
         // Update newly created User in DB
         userRepository.save(savedUser);
         return true;
+    }
+
+    /***
+     * Change password for user
+     *
+     * @param passwordDto dto with old and new passwords from a client
+     * @param authentication authentication instance from controller
+     */
+    @Override
+    public void changePassword(NewPasswordDto passwordDto, Authentication authentication) {
+        UserDetails userDetails = manager.loadUserByUsername(authentication.getName());
+        String encryptedPassword = userDetails.getPassword();
+        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
+        if (encoder.matches(passwordDto.getCurrentPassword(), encryptedPasswordWithoutEncryptionType)) {
+            User user = userService.getUser(authentication.getName());
+            user.setPassword("{bcrypt}" + encoder.encode(passwordDto.getNewPassword()));
+            userRepository.save(user);
+        } else {
+            throw new UserHasNoRightsException("User inputs wrong current password");
+        }
     }
 }
