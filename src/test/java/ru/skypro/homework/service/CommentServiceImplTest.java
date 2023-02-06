@@ -49,7 +49,7 @@ public class CommentServiceImplTest {
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
 
         testAds = new Ads();
         testAds.setId(1L);

@@ -1,6 +1,5 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,7 +7,10 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.entity.User;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.service.UserService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -16,18 +18,24 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsManager manager;
 
     private final PasswordEncoder encoder;
+    private final UserService userService;
 
-    public AuthServiceImpl(UserDetailsManager manager) {
+    private final UserRepository userRepository;
+
+
+    public AuthServiceImpl(UserDetailsManager manager, UserService userService, UserRepository userRepository) {
         this.manager = manager;
+        this.userService = userService;
         this.encoder = new BCryptPasswordEncoder();
+        this.userRepository = userRepository;
     }
 
     /**
-     * Authorization of user
+     * Check if user can log in
      *
-     * @param userName
-     * @param password
-     * @return PasswordEncoder
+     * @param userName - username from a client
+     * @param password - password from a client
+     * @return boolean result of login
      */
     @Override
     public boolean login(String userName, String password) {
@@ -41,24 +49,33 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * Of user information
+     * New user registration
      *
-     * @param registerReqDto
-     * @param role
-     * @return  authenticity of user information
+     * @param registerReqDto - new user credentials from a client
+     * @param role - user role
+     * @return boolean result of registration
      */
     @Override
     public boolean register(RegisterReqDto registerReqDto, Role role) {
         if (manager.userExists(registerReqDto.getUsername())) {
             return false;
         }
+        //create new User with UserDetailsManager and save it in DB
         manager.createUser(
-                User.withDefaultPasswordEncoder()
+                org.springframework.security.core.userdetails.User.withDefaultPasswordEncoder()
                         .password(registerReqDto.getPassword())
                         .username(registerReqDto.getUsername())
                         .roles(role.name())
                         .build()
         );
+        // Get newly created user dto and assign other fields
+        User savedUser = userService.getUser(registerReqDto.getUsername());
+        savedUser.setFirstName(registerReqDto.getFirstName());
+        savedUser.setLastName(registerReqDto.getLastName());
+        savedUser.setPhone(registerReqDto.getPhone());
+
+        // Update newly created User in DB
+        userRepository.save(savedUser);
         return true;
     }
 }

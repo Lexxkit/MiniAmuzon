@@ -55,7 +55,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     public AdsDto createAds(CreateAdsDto createAdsDto, MultipartFile image, Authentication authentication) {
         log.info("Was invoked createAds method from {}", AdsService.class.getSimpleName());
-        UserDto currentUserDto = userService.getUserByEmail(authentication.getName());
+        UserDto currentUserDto = userService.getUserDtoByUsername(authentication.getName());
         Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
         ads.setAuthor(userMapper.userDtoToUser(currentUserDto));
         Ads savedAds = adsRepository.save(ads);
@@ -90,7 +90,7 @@ public class AdsServiceImpl implements AdsService {
         log.info("Was invoked removeAds method from {}", AdsService.class.getSimpleName());
         Ads ads = getAdsById(id);
 
-        checkIfUserCanAlterAds(authentication, ads);
+        userService.checkIfUserHasPermissionToAlter(authentication, ads.getAuthor().getUsername());
         adsRepository.delete(ads);
     }
 
@@ -106,8 +106,7 @@ public class AdsServiceImpl implements AdsService {
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Was invoked updateAdsById method from {}", AdsService.class.getSimpleName());
         Ads oldAds = getAdsById(id);
-
-        checkIfUserCanAlterAds(authentication, oldAds);
+        userService.checkIfUserHasPermissionToAlter(authentication, oldAds.getAuthor().getUsername());
         Ads infoToUpdate = adsMapper.createAdsDtoToAds(createAdsDto);
 
         oldAds.setPrice(infoToUpdate.getPrice());
@@ -116,16 +115,6 @@ public class AdsServiceImpl implements AdsService {
 
         Ads updatedAds = adsRepository.save(oldAds);
         return adsMapper.adsToAdsDto(updatedAds);
-    }
-
-    private void checkIfUserCanAlterAds(Authentication authentication, Ads ads) {
-        boolean matchUser = authentication.getName().equals(ads.getAuthor().getEmail());
-        boolean userIsAdmin = userService.checkIfUserIsAdmin(authentication);
-
-        if (!(userIsAdmin || matchUser)){
-            log.warn("Current Ads isn't of authentication user!");
-            throw new RuntimeException("403 Forbidden");
-        }
     }
 
     /**
@@ -137,7 +126,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public ResponseWrapperAds getAllAdsForUser(String username) {
         log.info("Was invoked getAllAdsForUser method from {}", AdsService.class.getSimpleName());
-        List<Ads> userAdsList = adsRepository.findAdsByAuthorEmail(username);
+        List<Ads> userAdsList = adsRepository.findAdsByAuthorUsername(username);
         return adsMapper.adsListToResponseWrapperAds(userAdsList.size(), userAdsList);
     }
 

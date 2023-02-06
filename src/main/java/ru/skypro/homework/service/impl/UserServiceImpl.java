@@ -11,6 +11,7 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AvatarRepository;
@@ -51,7 +52,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto updateUser(UserDto userDto, String username) {
-        User user = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new);
+        User user = getUser(username);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -67,8 +68,8 @@ public class UserServiceImpl implements UserService {
             log.warn("File '{}' is empty.", file.getOriginalFilename());
             throw new EmptyFileException();
         }
-        // Эту строчку необходимо переписать после изучения работы с авторизацией.
-        User testUser = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
+
+        User testUser = getUser(username);
 
         Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
 
@@ -84,14 +85,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByEmail(String email) {
-        User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
+    public User getUser(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public UserDto getUserDtoByUsername(String username) {
+        User response = getUser(username);
         return userMapper.userToUserDto(response);
     }
 
     @Override
-    public boolean checkIfUserIsAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream()
+    public void checkIfUserHasPermissionToAlter(Authentication authentication, String username) {
+        boolean matchUser = authentication.getName().equals(username);
+        boolean userIsAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+
+        if (!(userIsAdmin || matchUser)){
+            log.warn("Current user has NO rights to perform this operation.");
+            throw new UserHasNoRightsException("Current user has NO rights to perform this operation.");
+        }
     }
 }

@@ -1,7 +1,6 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
-import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,13 +15,16 @@ public class User {
     private Long id;
     private String firstName;
     private String lastName;
-    private String email;
+    private String username;
     private String phone;
     private String city;
     private LocalDateTime regDate;
     private String password;
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
+    private boolean enabled;
+
+    // TODO: 05.02.2023 Похоже что это поле вообще не нужно!!!
+//    @Enumerated(value = EnumType.STRING)
+//    private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Avatar avatar;

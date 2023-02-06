@@ -40,25 +40,25 @@ public class UserServiceImplTest {
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
     }
 
     @Test
     void shouldThrowUserNotFoundException_whenGetUserByEmailNotInDB() {
-        when(userRepository.findUserByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(userRepository.findUserByUsername(any(String.class))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(UserNotFoundException.class)
-                .isThrownBy(() -> out.getUserByEmail("Wrong email"));
+                .isThrownBy(() -> out.getUserDtoByUsername("Wrong email"));
     }
 
     @Test
     void shouldReturnUserDto_whenGetUserByEmail() {
-        when(userRepository.findUserByEmail(any(String.class))).thenReturn(Optional.of(testUser));
-        UserDto result = out.getUserByEmail(testUser.getEmail());
+        when(userRepository.findUserByUsername(any(String.class))).thenReturn(Optional.of(testUser));
+        UserDto result = out.getUserDtoByUsername(testUser.getUsername());
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(testUser.getId());
-        assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
+        assertThat(result.getEmail()).isEqualTo(testUser.getUsername());
         assertThat(result.getLastName()).isNull();
     }
 }
