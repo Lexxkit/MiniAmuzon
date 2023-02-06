@@ -69,9 +69,9 @@ public class UserServiceImpl implements UserService {
             throw new EmptyFileException();
         }
 
-        User testUser = getUser(username);
+        User currentUser = getUser(username);
 
-        Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
+        Avatar avatar = avatarRepository.findByUserId(currentUser.getId()).orElse(new Avatar());
 
         try {
             avatar.setImage(file.getBytes());
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
             log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
             throw new RuntimeException("Problems with uploaded image");
         }
-        avatar.setUser(testUser);
+        avatar.setUser(currentUser);
 
         avatarRepository.save(avatar);
     }

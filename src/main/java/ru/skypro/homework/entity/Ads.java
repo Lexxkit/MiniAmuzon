@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
 
 @Entity
 @Data
@@ -19,8 +20,13 @@ public class Ads {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User author;
-    @OneToMany(mappedBy = "ads")
+    @OneToMany(mappedBy = "ads", cascade = CascadeType.ALL)
     private List<Comment> comments;
-    @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Image> images;
+
+    public Image getRandomAdsImage() {
+        Random random = new Random();
+        return (images == null || images.isEmpty()) ? null : images.get(random.nextInt(images.size()));
+    }
 }

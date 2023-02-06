@@ -1,9 +1,6 @@
 package ru.skypro.homework.mapper;
 
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
@@ -18,7 +15,7 @@ import java.util.List;
 public interface AdsMapper {
     @Mapping(source = "author.id", target = "author")
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "images", target = "image")
+    @Mapping(source = "ads", target = "image", qualifiedByName = "getImageLink")
     AdsDto adsToAdsDto(Ads ads);
 
     @Mapping(source = "author", target = "author.id")
@@ -36,10 +33,12 @@ public interface AdsMapper {
     @Mapping(source = "author.username", target = "email")
     @Mapping(source = "author.phone", target = "phone")
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "images", target = "image")
+    @Mapping(source = "ads", target = "image", qualifiedByName = "getImageLink")
     FullAdsDto adsToFullAdsDto(Ads ads);
 
-    default String mapImageToString(Image image) {
-        return Arrays.toString(image.getData());
+    @Named("getImageLink")
+    default String getImageLink(Ads ads) {
+        Image adsImage = ads.getRandomAdsImage();
+        return (adsImage == null) ? null : "/image/" + adsImage.getId().toString();
     }
 }

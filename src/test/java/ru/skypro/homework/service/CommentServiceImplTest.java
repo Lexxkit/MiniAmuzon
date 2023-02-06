@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Ads;
@@ -35,6 +37,8 @@ public class CommentServiceImplTest {
     private AdsService adsService;
     @Mock
     private CommentRepository commentRepository;
+    @Mock
+    private UserService userService;
     @Spy
     private CommentMapper commentMapper = new CommentMapperImpl();
     @InjectMocks
@@ -44,12 +48,14 @@ public class CommentServiceImplTest {
     private Comment testComment;
     private CommentDto testCommentDto;
     private User testUser;
+    private Authentication auth;
 
     @BeforeEach
     void init() {
         testUser = new User();
         testUser.setId(42L);
         testUser.setUsername("test@test.com");
+        auth = new UsernamePasswordAuthenticationToken(testUser, null);
 
         testAds = new Ads();
         testAds.setId(1L);
@@ -81,8 +87,9 @@ public class CommentServiceImplTest {
     void shouldReturnCommentDto_WhenCreateNewComment() {
         when(adsService.getAdsById(anyLong())).thenReturn(testAds);
         when(commentRepository.save(any(Comment.class))).thenReturn(testComment);
+        when(userService.getUser(any(String.class))).thenReturn(null);
 
-        CommentDto result = out.createNewComment(testAds.getId(), testCommentDto);
+        CommentDto result = out.createNewComment(testAds.getId(), testCommentDto, auth);
 
         assertThat(result).isNotNull();
         assertThat(result.getText()).isEqualTo(testCommentDto.getText());

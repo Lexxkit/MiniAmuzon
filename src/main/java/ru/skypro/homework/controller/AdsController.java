@@ -89,9 +89,11 @@ public class AdsController {
             })
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") long adPk, @RequestBody CommentDto commentDto) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") long adPk,
+                                                  @RequestBody CommentDto commentDto,
+                                                  Authentication authentication) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        CommentDto newComment = commentService.createNewComment(adPk, commentDto);
+        CommentDto newComment = commentService.createNewComment(adPk, commentDto, authentication);
         return ResponseEntity.ok(newComment);
     }
 

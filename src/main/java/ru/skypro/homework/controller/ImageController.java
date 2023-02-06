@@ -16,7 +16,7 @@ import ru.skypro.homework.service.ImageService;
 @RequiredArgsConstructor
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequestMapping
+@RequestMapping(path = "/image")
 public class ImageController {
 
     private  final ImageService imageService;
@@ -32,12 +32,16 @@ public class ImageController {
                     ),
                     @ApiResponse(responseCode = "404", content = @Content)
             })
-    @PatchMapping (value = "/image/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping (value = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
         log.info("Was invoked updateAdsImage method from {}", ImageController.class.getSimpleName());
 
         byte[] imageBytes = imageService.updateAdsImage(id, image);
         return ResponseEntity.ok(imageBytes);
+    }
 
+    @GetMapping(value = "{id}", produces = {MediaType.IMAGE_PNG_VALUE})
+    public ResponseEntity<byte[]> getAdsImage(@PathVariable Long id) {
+        return ResponseEntity.ok(imageService.getAdsImage(id));
     }
 }
