@@ -8,6 +8,7 @@ import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
+import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.CommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.repository.CommentRepository;
@@ -15,6 +16,7 @@ import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -35,11 +37,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDto createNewComment(Long adsId, CommentDto commentDto) {
+    public CommentDto createNewComment(Long adsId, CommentDto commentDto, Authentication authentication) {
         log.info("Was invoked createNewComment method from {}", CommentService.class.getSimpleName());
         Ads adsById = adsService.getAdsById(adsId);
+        User author = userService.getUser(authentication.getName());
         Comment comment = commentMapper.commentDtoToComment(commentDto);
         comment.setAds(adsById);
+        comment.setAuthor(author);
+        comment.setCreatedAt(LocalDateTime.now());
         Comment savedComment = commentRepository.save(comment);
         return commentMapper.commentToCommentDto(savedComment);
     }

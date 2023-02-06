@@ -9,7 +9,7 @@ public interface CommentService {
 
     ResponseWrapperComment getAllCommentsForAdsWithId(Long adsId);
 
-    CommentDto createNewComment(Long adsId, CommentDto commentDto);
+    CommentDto createNewComment(Long adsId, CommentDto commentDto, Authentication authentication);
 
     CommentDto getComments(long adPk, long id);
 

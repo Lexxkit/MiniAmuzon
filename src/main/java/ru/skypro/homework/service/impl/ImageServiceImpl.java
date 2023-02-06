@@ -29,7 +29,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public byte[] updateAdsImage(long id, MultipartFile file) {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
-        Image oldImage = imageRepository.findById(id).orElseThrow(ImageNotFoundException::new);
+        Image oldImage = getImageFromDB(id);
         extractInfoFromFile(file, oldImage);
         Image savedImage = imageRepository.save(oldImage);
         return savedImage.getData();
@@ -42,6 +42,15 @@ public class ImageServiceImpl implements ImageService {
         extractInfoFromFile(file, imageToSave);
         imageToSave.setAds(ads);
         return imageRepository.save(imageToSave);
+    }
+
+    @Override
+    public byte[] getAdsImage(Long id) {
+        return getImageFromDB(id).getData();
+    }
+
+    private Image getImageFromDB(long id) {
+        return imageRepository.findById(id).orElseThrow(ImageNotFoundException::new);
     }
 
     private void extractInfoFromFile(MultipartFile file, Image imageToSave) {

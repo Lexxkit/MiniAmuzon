@@ -12,6 +12,8 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -68,11 +70,12 @@ public class AuthServiceImpl implements AuthService {
                         .roles(role.name())
                         .build()
         );
-        // Get newly created user dto and assign other fields
+        // Get newly created user from DB and assign other fields
         User savedUser = userService.getUser(registerReqDto.getUsername());
         savedUser.setFirstName(registerReqDto.getFirstName());
         savedUser.setLastName(registerReqDto.getLastName());
         savedUser.setPhone(registerReqDto.getPhone());
+        savedUser.setRegDate(LocalDateTime.now());
 
         // Update newly created User in DB
         userRepository.save(savedUser);

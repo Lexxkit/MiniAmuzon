@@ -54,6 +54,7 @@ class AdsServiceImplTest {
     private CreateAdsDto createAdsDto;
     private User testUser;
     private Authentication auth;
+    private Image testImage;
 
     @BeforeEach
     void init() {
@@ -61,6 +62,9 @@ class AdsServiceImplTest {
         testUser.setId(42L);
         testUser.setUsername("test@test.com");
         auth = new UsernamePasswordAuthenticationToken(testUser, null);
+
+        testImage = new Image();
+        testImage.setId(1L);
 
         createAdsDto = new CreateAdsDto();
         createAdsDto.setDescription("Test description");
@@ -96,7 +100,7 @@ class AdsServiceImplTest {
     @Test
     void shouldReturnAdsDto_WhenCreateAds() {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
-        when(imageService.createImage(any(), any())).thenReturn(new Image());
+        when(imageService.createImage(any(), any())).thenReturn(testImage);
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
         when(userService.getUserDtoByUsername(any(String.class))).thenReturn(null);
         AdsDto result = out.createAds(createAdsDto, null, auth);
