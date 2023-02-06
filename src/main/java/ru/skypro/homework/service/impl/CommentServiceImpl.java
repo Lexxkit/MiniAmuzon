@@ -51,21 +51,21 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto getComments(long adPk, long id) {
-        Comment comment = getCommentByIdAndAuthorId(adPk,id);
+        Comment comment = getCommentById(id);
         return commentMapper.commentToCommentDto(comment);
     }
 
     @Override
     public void deleteComments (long adPk, long id,  Authentication authentication) {
-        Comment comment = getCommentByIdAndAuthorId(adPk, id);
-
+        Comment comment = getCommentById(id);
+        log.info("Comment to delete {} {}", comment.getId(), comment.getText());
         userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getUsername());
         commentRepository.delete(comment);
     }
 
     @Override
     public CommentDto updateComments(long adPk, long id, CommentDto commentDto, Authentication authentication){
-        Comment comment = getCommentByIdAndAuthorId(adPk, id);
+        Comment comment = getCommentById(id);
 
         userService.checkIfUserHasPermissionToAlter(authentication, comment.getAuthor().getUsername());
         comment.setText(commentDto.getText());
@@ -74,9 +74,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment getCommentByIdAndAuthorId(long adPk, long id) {
-        log.info("Was invoked getCommentByIdAndAuthorId method from {}", CommentService.class.getSimpleName());
-        return commentRepository.findCommentByIdAndAuthorId(adPk,id)
+    public Comment getCommentById(long id) {
+        log.info("Was invoked getCommentById method from {}", CommentService.class.getSimpleName());
+        return commentRepository.findById(id)
                 .orElseThrow(CommentNotFoundException::new);
     }
 }
+

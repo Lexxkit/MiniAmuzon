@@ -99,7 +99,7 @@ public class CommentServiceImplTest {
 
     @Test
     void shouldReturnCommentDto_WhenGetCommentsWithIdAndAuthorId() {
-        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.of(testComment));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
         CommentDto result = out.getComments(testComment.getId(), testUser.getId());
 
         assertThat(result).isNotNull();
@@ -109,7 +109,7 @@ public class CommentServiceImplTest {
 
     @Test
     void shouldThrowCommentNotFoundException_WhenGetCommentsWithWrongIdAndAuthorId() {
-        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.empty());
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> out.getComments(testComment.getId(), testUser.getId()));
