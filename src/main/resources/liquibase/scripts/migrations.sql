@@ -48,3 +48,8 @@ create table if not exists images (
     ads_id     bigint references ads (id) on delete cascade
 );
 
+-- changeset oalekseenko:2
+create index users_username_idx on users(username);
+create index avatars_user_id_idx on avatars(user_id);
+
+
