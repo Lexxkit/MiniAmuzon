@@ -18,6 +18,7 @@ import java.io.IOException;
 @Service
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
+
     /**
      * Receive old image by id, update and save
      *
@@ -35,6 +36,13 @@ public class ImageServiceImpl implements ImageService {
         return savedImage.getData();
     }
 
+    /**
+     * Create new image for ads
+     *
+     * @param file
+     * @param ads
+     * @return image created
+     */
     @Override
     public Image createImage(MultipartFile file, Ads ads) {
         log.info("Was invoked createImage method from {}", ImageService.class.getSimpleName());
@@ -44,6 +52,12 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.save(imageToSave);
     }
 
+    /**
+     * Get image for ads by Ads id
+     *
+     * @param id
+     * @return image
+     */
     @Override
     public byte[] getAdsImage(Long id) {
         return getImageFromDB(id).getData();

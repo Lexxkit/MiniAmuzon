@@ -230,8 +230,6 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAds> getAdsMe(@RequestParam(value = "authenticated", required = false) Boolean authenticated,
                                                        @RequestParam(value = "authorities[0].authority", required = false) String authority,
                                                        @RequestParam(value = "credentials", required = false) Object credentials,
-                                                       @RequestParam(value = "details", required = false) Object details,
-                                                       @RequestParam(value = "principal", required = false) Object principal,
                                                        Authentication authentication) {
         log.info("Was invoked get all ads for current user = {} method", authentication.getName());
         log.info("{}", authentication.getAuthorities());
