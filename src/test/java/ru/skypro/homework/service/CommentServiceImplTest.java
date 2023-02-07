@@ -15,6 +15,7 @@ import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.CommentNotFoundException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.mapper.CommentMapperImpl;
 import ru.skypro.homework.repository.CommentRepository;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceImplTest {
@@ -66,6 +67,7 @@ public class CommentServiceImplTest {
         testComment.setCreatedAt(LocalDateTime.of(1, 1, 1, 1, 1, 1));
         testComment.setText("Test comment");
         testComment.setId(1L);
+        testComment.setAuthor(testUser);
 
         testAds.setComments(List.of(testComment));
 
@@ -113,5 +115,47 @@ public class CommentServiceImplTest {
 
         assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> out.getComments(testComment.getId(), testUser.getId()));
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToDeleteComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.deleteComments(testAds.getId(), testComment.getId(), auth));
+    }
+
+    @Test
+    void shouldExecuteDeleteOnce_whenUserCanDeleteComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        out.deleteComments(testAds.getId(), testComment.getId(), auth);
+
+        verify(commentRepository, atMostOnce()).delete(testComment);
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToUpdateComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.updateComments(testAds.getId(),testComment.getId(), testCommentDto, auth));
+    }
+
+    @Test
+    void shouldExecuteSaveOnce_whenUserCanUpdateAds() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+        when(commentRepository.save(any())).thenReturn(testComment);
+
+        CommentDto result = out.updateComments(testAds.getId(), testComment.getId(), testCommentDto, auth);
+
+        verify(commentRepository, atMostOnce()).save(testComment);
+        verify(commentMapper, atLeastOnce()).commentToCommentDto(testComment);
+
+        assertThat(result).isNotNull();
     }
 }
