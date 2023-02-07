@@ -101,6 +101,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
     }
 
+    /**
+     * Get {@link User} by username from the DB and converts to {@link UserDto}.
+     * @param username name to find a user in the DB
+     * @return {@link UserDto} instance
+     * @throws UserNotFoundException if username not in the DB
+     */
     @Override
     public UserDto getUserDtoByUsername(String username) {
         User response = getUser(username);
@@ -112,7 +118,7 @@ public class UserServiceImpl implements UserService {
      * OR if user has role ADMIN. Throws exception if none of the conditions are true.
      * @param authentication {@link Authentication} instance from controller
      * @param username name of a user
-     * @throws UserHasNoRightsException
+     * @throws UserHasNoRightsException if username doesn't match authentication OR user is not 'ADMIN'
      */
     @Override
     public void checkIfUserHasPermissionToAlter(Authentication authentication, String username) {

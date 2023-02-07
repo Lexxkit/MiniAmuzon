@@ -6,12 +6,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.*;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
+import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.AdsNotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
-import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.ImageService;
@@ -25,7 +28,6 @@ import java.util.List;
 public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
     private final AdsMapper adsMapper;
-    private final UserMapper userMapper;
     private final ImageService imageService;
     private final UserService userService;
 
@@ -55,9 +57,9 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     public AdsDto createAds(CreateAdsDto createAdsDto, MultipartFile image, Authentication authentication) {
         log.info("Was invoked createAds method from {}", AdsService.class.getSimpleName());
-        UserDto currentUserDto = userService.getUserDtoByUsername(authentication.getName());
+        User currentUser = userService.getUser(authentication.getName());
         Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
-        ads.setAuthor(userMapper.userDtoToUser(currentUserDto));
+        ads.setAuthor(currentUser);
         Ads savedAds = adsRepository.save(ads);
 
         Image adsImage = imageService.createImage(image, savedAds);
