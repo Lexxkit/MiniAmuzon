@@ -20,12 +20,12 @@ public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
     /**
-     * Receive old image by id, update and save
+     * Receive old image by id, update and save.
      *
-     * @param id
-     * @param file
-     * @return image updated
-     * @throws IOException if no image was found
+     * @param id identification number of an image
+     * @param file {@link MultipartFile} with an image
+     * @return byte array
+     * @throws ImageNotFoundException if no image was found
      */
     @Override
     public byte[] updateAdsImage(long id, MultipartFile file) {
@@ -37,10 +37,10 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
-     * Create new image for ads
+     * Create new image for ads.
      *
-     * @param file
-     * @param ads
+     * @param file {@link MultipartFile} with an image
+     * @param ads {@link Ads} instance
      * @return image created
      */
     @Override
@@ -53,10 +53,10 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
-     * Get image for ads by Ads id
+     * Get image for ads by image id.
      *
-     * @param id
-     * @return image
+     * @param id identification number of an image
+     * @return byte array
      */
     @Override
     public byte[] getAdsImage(Long id) {

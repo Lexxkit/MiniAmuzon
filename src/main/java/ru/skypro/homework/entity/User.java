@@ -22,10 +22,6 @@ public class User {
     private String password;
     private boolean enabled;
 
-    // TODO: 05.02.2023 Похоже что это поле вообще не нужно!!!
-//    @Enumerated(value = EnumType.STRING)
-//    private Role role;
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Avatar avatar;
 

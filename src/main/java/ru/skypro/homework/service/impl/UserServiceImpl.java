@@ -11,6 +11,7 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.ImageNotFoundException;
 import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
@@ -88,6 +89,17 @@ public class UserServiceImpl implements UserService {
         avatar.setUser(currentUser);
 
         avatarRepository.save(avatar);
+    }
+
+    /**
+     * Get user avatar for by its id.
+     * @param id id identification number of an image
+     * @return byte array
+     */
+    @Override
+    public byte[] getUserAvatar(long id) {
+        Avatar avatar = avatarRepository.findById(id).orElseThrow(ImageNotFoundException::new);
+        return avatar.getImage();
     }
 
     /**

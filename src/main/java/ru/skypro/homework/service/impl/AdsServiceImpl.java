@@ -32,11 +32,10 @@ public class AdsServiceImpl implements AdsService {
     private final UserService userService;
 
     /**
-     * Receive all Ads
-     * The Service method is being used{@link AdsService#getAllAds()}
-     * wherein the repository method is used to get all declarations{@link AdsRepository#findAll()}
+     * Receive all Ads.
+     * The repository method {@link AdsRepository#findAll()} is used to get a List of all ads.
      *
-     * @return ad list
+     * @return {@link ResponseWrapperAds} instance with number of founded ads and List of {@link AdsDto}
      */
     @Override
     public ResponseWrapperAds getAllAds() {
@@ -46,12 +45,12 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Creating of new ad
+     * Creates new ad.
      *
-     * @param createAdsDto
-     * @param image
-     * @param authentication
-     * @return ad created
+     * @param createAdsDto {@link CreateAdsDto} from a client
+     * @param image {@link MultipartFile} with image from a client
+     * @param authentication {@link Authentication} instance from controller
+     * @return {@link AdsDto} instance of the created ad
      */
     @Override
     @Transactional
@@ -68,10 +67,10 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Search for a full ad in DB by ID
+     * Search for a full ad in DB by ID.
      *
-     * @param id
-     * @return
+     * @param id identification number of ad
+     * @return {@link FullAdsDto} instance for desired ad
      */
     @Override
     public FullAdsDto getFullAdsById(long id) {
@@ -81,11 +80,11 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Delete ad from DB by id
-     * The repository method is being used {@link AdsRepository#delete(Object)}
+     * Delete ad from DB by id.
+     * The repository method {@link AdsRepository#delete(Object)} is used.
      *
-     * @param id
-     * @param authentication
+     * @param id identification number of ad
+     * @param authentication {@link Authentication} instance from controller
      */
     @Override
     public void removeAds(long id, Authentication authentication) {
@@ -97,12 +96,12 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Receive old ad by id, update and save
+     * Update an ad by its ID.
      *
-     * @param id
-     * @param createAdsDto
-     * @param authentication
-     * @return ad update
+     * @param id identification number of ad
+     * @param createAdsDto {@link CreateAdsDto} instance from a client
+     * @param authentication {@link Authentication} instance from controller
+     * @return {@link AdsDto} instance with updated information
      */
     @Override
     public AdsDto updateAdsById(long id, CreateAdsDto createAdsDto, Authentication authentication) {
@@ -120,10 +119,10 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Receive all ads for user
+     * Receive all ads for the particular user.
      *
-     * @param username
-     * @return ad list
+     * @param username name of a user
+     * @return {@link ResponseWrapperAds} instance with number of founded ads and List of {@link AdsDto}
      */
     @Override
     public ResponseWrapperAds getAllAdsForUser(String username) {
@@ -133,10 +132,10 @@ public class AdsServiceImpl implements AdsService {
     }
 
     /**
-     * Receive ad by id
-     * The repository method is being used {@link AdsRepository#findById(Object)}
-     * @param id
-     * @return ad by id
+     * Receive ad by id.
+     * The repository method {@link AdsRepository#findById(Object)} is used.
+     * @param id identification number of ad
+     * @return {@link Ads} instance
      * @throws AdsNotFoundException if no ad was found
      */
     @Override

@@ -30,10 +30,10 @@ public class CommentServiceImpl implements CommentService {
     private final UserService userService;
 
     /**
-     * Receive all comments for Ads by Ads id
+     * Receive all comments for Ads by Ads id.
      *
-     * @param adsId
-     * @return comments list
+     * @param adsId identification number of an ad
+     * @return {@link ResponseWrapperComment} instance with number of founded comments and List of {@link CommentDto}
      */
     @Override
     public ResponseWrapperComment getAllCommentsForAdsWithId(Long adsId) {
@@ -44,12 +44,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Creating of new comment
+     * Creating of new comment.
      *
-     * @param adsId
-     * @param commentDto
-     * @param authentication
-     * @return comment created
+     * @param adsId identification number of an ad
+     * @param commentDto {@link CommentDto} from a client
+     * @param authentication {@link Authentication} instance from controller
+     * @return {@link CommentDto} instance of created {@link Comment}
      */
     @Override
     public CommentDto createNewComment(Long adsId, CommentDto commentDto, Authentication authentication) {
@@ -65,11 +65,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Get comment by Ads id and comment id
+     * Get comment by Ads id and comment id.
      *
-     * @param adPk
-     * @param id
-     * @return comment
+     * @param adPk identification number of an ad
+     * @param id identification number of a comment
+     * @return {@link CommentDto} instance
      */
     @Override
     public CommentDto getComments(long adPk, long id) {
@@ -79,12 +79,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Delete comment from DB by id
-     * The repository method is being used {@link CommentRepository#delete(Object)}
+     * Delete comment from DB by id.
+     * The repository method {@link CommentRepository#delete(Object)} is used.
      *
-     * @param adPk
-     * @param id
-     * @param authentication
+     * @param adPk identification number of an ad
+     * @param id identification number of a comment
+     * @param authentication {@link Authentication} instance from controller
      */
     @Override
     public void deleteComments (long adPk, long id,  Authentication authentication) {
@@ -95,12 +95,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Receive comment by comment id with checking by ads id in DB, then update comment
+     * Receive comment by comment id with checking by ads id in DB, then update comment.
      *
-     * @param adPk
-     * @param id
-     * @param commentDto
-     * @param authentication
+     * @param adPk identification number of an ad
+     * @param id identification number of a comment
+     * @param commentDto {@link CommentDto} from a client
+     * @param authentication {@link Authentication} instance from controller
      * @return comment update
      */
     @Override
@@ -114,10 +114,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Get comment by comment id
+     * Get comment by comment id.
      *
-     * @param id
-     * @return comment
+     * @param id identification number of a comment
+     * @return {@link Comment} instance
      * @throws CommentNotFoundException if comment wasn't found
      */
     @Override

@@ -17,13 +17,14 @@ import ru.skypro.homework.service.UserService;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
+
 @RequestMapping(path = "/users")
 public class UserController {
 
     private final UserService userService;
     private final AuthService authService;
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/set_password")
     public ResponseEntity<Void> setPassword(@RequestBody NewPasswordDto newPasswordDto,
                                                       Authentication authentication) {
@@ -32,12 +33,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUser(Authentication authentication) {
         log.info("Was invoked get user by Email method");
         return ResponseEntity.ok(userService.getUserDtoByUsername(authentication.getName()));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto,
                                               Authentication authentication) {
@@ -51,5 +54,10 @@ public class UserController {
         log.info("Was invoked update user image method");
         userService.updateUserAvatar(authentication.getName(), image);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/avatar/{id}", produces = {MediaType.IMAGE_PNG_VALUE})
+    public ResponseEntity<byte[]> getUserAvatar(@PathVariable long id) {
+        return ResponseEntity.ok(userService.getUserAvatar(id));
     }
 }
