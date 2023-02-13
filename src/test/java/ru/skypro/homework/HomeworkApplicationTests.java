@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import ru.skypro.homework.controller.AdsController;
+import ru.skypro.homework.controller.AuthController;
 import ru.skypro.homework.controller.ImageController;
 import ru.skypro.homework.controller.UserController;
 
@@ -19,6 +20,8 @@ class HomeworkApplicationTests {
     @Autowired
     private AdsController adsController;
     @Autowired
+    private AuthController authController;
+    @Autowired
     private UserController userController;
     @Autowired
     private ImageController imageController;
@@ -26,6 +29,7 @@ class HomeworkApplicationTests {
     @Test
     void contextLoads() {
         assertThat(adsController).isNotNull();
+        assertThat(authController).isNotNull();
         assertThat(userController).isNotNull();
         assertThat(imageController).isNotNull();
     }

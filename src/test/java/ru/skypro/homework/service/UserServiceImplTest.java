@@ -7,8 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.mapper.UserMapperImpl;
@@ -21,7 +24,8 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
@@ -35,30 +39,60 @@ public class UserServiceImplTest {
     private UserServiceImpl out;
 
     private User testUser;
+    private Authentication auth;
 
     @BeforeEach
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
+
+        auth = new UsernamePasswordAuthenticationToken(testUser, null);
     }
 
     @Test
-    void shouldThrowUserNotFoundException_whenGetUserByEmailNotInDB() {
-        when(userRepository.findUserByEmail(any(String.class))).thenReturn(Optional.empty());
+    void shouldThrowUserNotFoundException_whenGetUserByUsernameNotInDB() {
+        when(userRepository.findUserByUsername(any(String.class))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(UserNotFoundException.class)
-                .isThrownBy(() -> out.getUserByEmail("Wrong email"));
+                .isThrownBy(() -> out.getUserDtoByUsername("Wrong email"));
     }
 
     @Test
-    void shouldReturnUserDto_whenGetUserByEmail() {
-        when(userRepository.findUserByEmail(any(String.class))).thenReturn(Optional.of(testUser));
-        UserDto result = out.getUserByEmail(testUser.getEmail());
+    void shouldReturnUserDto_whenGetUserByUsername() {
+        when(userRepository.findUserByUsername(any(String.class))).thenReturn(Optional.of(testUser));
+        UserDto result = out.getUserDtoByUsername(testUser.getUsername());
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(testUser.getId());
-        assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
+        assertThat(result.getEmail()).isEqualTo(testUser.getUsername());
         assertThat(result.getLastName()).isNull();
+    }
+
+    @Test
+    void shouldReturnUser_whenGetUser() {
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(testUser));
+        User result = out.getUser(testUser.getUsername());
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(testUser);
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUsernameDoesNotMatchAuthAndNotAdmin() {
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.checkIfUserHasPermissionToAlter(auth, testUser.getUsername()));
+    }
+
+    @Test
+    void shouldExecuteSaveOnce_whenUpdateUser() {
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(testUser));
+        when(userRepository.save(testUser)).thenReturn(testUser);
+
+        UserDto result = out.updateUser(userMapper.userToUserDto(testUser), testUser.getUsername());
+
+        verify(userRepository, atMostOnce()).save(testUser);
+
+        assertThat(result).isNotNull();
     }
 }

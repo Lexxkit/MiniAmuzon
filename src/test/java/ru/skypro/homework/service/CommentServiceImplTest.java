@@ -7,12 +7,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapperComment;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.CommentNotFoundException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.mapper.CommentMapperImpl;
 import ru.skypro.homework.repository.CommentRepository;
@@ -27,7 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceImplTest {
@@ -35,6 +38,8 @@ public class CommentServiceImplTest {
     private AdsService adsService;
     @Mock
     private CommentRepository commentRepository;
+    @Mock
+    private UserService userService;
     @Spy
     private CommentMapper commentMapper = new CommentMapperImpl();
     @InjectMocks
@@ -44,12 +49,14 @@ public class CommentServiceImplTest {
     private Comment testComment;
     private CommentDto testCommentDto;
     private User testUser;
+    private Authentication auth;
 
     @BeforeEach
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
+        auth = new UsernamePasswordAuthenticationToken(testUser, null);
 
         testAds = new Ads();
         testAds.setId(1L);
@@ -60,6 +67,7 @@ public class CommentServiceImplTest {
         testComment.setCreatedAt(LocalDateTime.of(1, 1, 1, 1, 1, 1));
         testComment.setText("Test comment");
         testComment.setId(1L);
+        testComment.setAuthor(testUser);
 
         testAds.setComments(List.of(testComment));
 
@@ -81,8 +89,9 @@ public class CommentServiceImplTest {
     void shouldReturnCommentDto_WhenCreateNewComment() {
         when(adsService.getAdsById(anyLong())).thenReturn(testAds);
         when(commentRepository.save(any(Comment.class))).thenReturn(testComment);
+        when(userService.getUser(any(String.class))).thenReturn(null);
 
-        CommentDto result = out.createNewComment(testAds.getId(), testCommentDto);
+        CommentDto result = out.createNewComment(testAds.getId(), testCommentDto, auth);
 
         assertThat(result).isNotNull();
         assertThat(result.getText()).isEqualTo(testCommentDto.getText());
@@ -92,7 +101,7 @@ public class CommentServiceImplTest {
 
     @Test
     void shouldReturnCommentDto_WhenGetCommentsWithIdAndAuthorId() {
-        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.of(testComment));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
         CommentDto result = out.getComments(testComment.getId(), testUser.getId());
 
         assertThat(result).isNotNull();
@@ -102,9 +111,51 @@ public class CommentServiceImplTest {
 
     @Test
     void shouldThrowCommentNotFoundException_WhenGetCommentsWithWrongIdAndAuthorId() {
-        when(commentRepository.findCommentByIdAndAuthorId(anyLong(), anyLong())).thenReturn(Optional.empty());
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> out.getComments(testComment.getId(), testUser.getId()));
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToDeleteComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.deleteComments(testAds.getId(), testComment.getId(), auth));
+    }
+
+    @Test
+    void shouldExecuteDeleteOnce_whenUserCanDeleteComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        out.deleteComments(testAds.getId(), testComment.getId(), auth);
+
+        verify(commentRepository, atMostOnce()).delete(testComment);
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToUpdateComments() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.updateComments(testAds.getId(),testComment.getId(), testCommentDto, auth));
+    }
+
+    @Test
+    void shouldExecuteSaveOnce_whenUserCanUpdateAds() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(testComment));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+        when(commentRepository.save(any())).thenReturn(testComment);
+
+        CommentDto result = out.updateComments(testAds.getId(), testComment.getId(), testCommentDto, auth);
+
+        verify(commentRepository, atMostOnce()).save(testComment);
+        verify(commentMapper, atLeastOnce()).commentToCommentDto(testComment);
+
+        assertThat(result).isNotNull();
     }
 }

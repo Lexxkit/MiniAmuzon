@@ -1,64 +1,95 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
+import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.security.MyUserDetailsService;
+import ru.skypro.homework.security.MyUserPrincipal;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.service.UserService;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
+    private final MyUserDetailsService manager;
 
     private final PasswordEncoder encoder;
+    private final UserService userService;
 
-    public AuthServiceImpl(UserDetailsManager manager) {
+    private final UserRepository userRepository;
+
+
+    public AuthServiceImpl(MyUserDetailsService manager, UserService userService,
+                           UserRepository userRepository, PasswordEncoder encoder) {
         this.manager = manager;
-        this.encoder = new BCryptPasswordEncoder();
+        this.userService = userService;
+        this.encoder = encoder;
+        this.userRepository = userRepository;
     }
 
     /**
-     * Authorization of user
+     * Check if user can log in
      *
-     * @param userName
-     * @param password
-     * @return PasswordEncoder
+     * @param userName username from a client
+     * @param password password from a client
+     * @return boolean result of login
      */
     @Override
     public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
-        }
         UserDetails userDetails = manager.loadUserByUsername(userName);
         String encryptedPassword = userDetails.getPassword();
-        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
-        return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
+        return encoder.matches(password, encryptedPassword);
     }
 
     /**
-     * Of user information
+     * New user registration
      *
-     * @param registerReqDto
-     * @param role
-     * @return  authenticity of user information
+     * @param registerReqDto new user credentials from a client
+     * @param role user role
+     * @return boolean result of registration
      */
     @Override
     public boolean register(RegisterReqDto registerReqDto, Role role) {
-        if (manager.userExists(registerReqDto.getUsername())) {
+        Optional<User> userByUsername = userRepository.findUserByUsername(registerReqDto.getUsername());
+        if (userByUsername.isPresent()) {
             return false;
         }
-        manager.createUser(
-                User.withDefaultPasswordEncoder()
-                        .password(registerReqDto.getPassword())
-                        .username(registerReqDto.getUsername())
-                        .roles(role.name())
-                        .build()
-        );
+
+        User savedUser = new User();
+        savedUser.setUsername(registerReqDto.getUsername());
+        savedUser.setPassword(encoder.encode(registerReqDto.getPassword()));
+        savedUser.setFirstName(registerReqDto.getFirstName());
+        savedUser.setLastName(registerReqDto.getLastName());
+        savedUser.setPhone(registerReqDto.getPhone());
+        savedUser.setRegDate(LocalDateTime.now());
+        savedUser.setRole(role);
+
+        userRepository.save(savedUser);
         return true;
+    }
+
+    /***
+     * Change password for user
+     *  @param passwordDto dto with old and new passwords from a client
+     * @param userPrincipal authentication instance from controller*/
+    @Override
+    public void changePassword(NewPasswordDto passwordDto, MyUserPrincipal userPrincipal) {
+        String encryptedPassword = userPrincipal.getPassword();
+        if (encoder.matches(passwordDto.getCurrentPassword(), encryptedPassword)) {
+            User user = userPrincipal.getUser();
+            user.setPassword(encoder.encode(passwordDto.getNewPassword()));
+            userRepository.save(user);
+        } else {
+            throw new UserHasNoRightsException("User inputs wrong current password");
+        }
     }
 }

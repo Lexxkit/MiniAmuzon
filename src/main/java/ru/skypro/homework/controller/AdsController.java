@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.ImageService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class AdsController {
 
     private final AdsService adsService;
     private final CommentService commentService;
+    private final ImageService imageService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
@@ -89,9 +91,11 @@ public class AdsController {
             })
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") long adPk, @RequestBody CommentDto commentDto) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk") long adPk,
+                                                  @RequestBody CommentDto commentDto,
+                                                  Authentication authentication) {
         log.info("Was invoked add comment for ad = {} method", adPk);
-        CommentDto newComment = commentService.createNewComment(adPk, commentDto);
+        CommentDto newComment = commentService.createNewComment(adPk, commentDto, authentication);
         return ResponseEntity.ok(newComment);
     }
 
@@ -225,14 +229,28 @@ public class AdsController {
             })
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperAds> getAdsMe(@RequestParam(value = "authenticated", required = false) Boolean authenticated,
-                                                       @RequestParam(value = "authorities[0].authority", required = false) String authority,
-                                                       @RequestParam(value = "credentials", required = false) Object credentials,
-                                                       @RequestParam(value = "details", required = false) Object details,
-                                                       @RequestParam(value = "principal", required = false) Object principal,
-                                                       Authentication authentication) {
+    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication authentication) {
         log.info("Was invoked get all ads for current user = {} method", authentication.getName());
         log.info("{}", authentication.getAuthorities());
         return ResponseEntity.ok(adsService.getAllAdsForUser(authentication.getName()));
+    }
+
+    @Operation(summary = "updateAdsImage",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                                    schema = @Schema(implementation = byte[].class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
+    @PatchMapping (value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
+        log.info("Was invoked updateAdsImage method from {}", ImageController.class.getSimpleName());
+
+        byte[] imageBytes = imageService.updateAdsImage(id, image);
+        return ResponseEntity.ok(imageBytes);
     }
 }

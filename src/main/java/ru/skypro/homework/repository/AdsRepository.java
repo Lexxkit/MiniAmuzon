@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface AdsRepository extends JpaRepository<Ads, Long> {
-    List<Ads> findAdsByAuthorEmail(String email);
+    List<Ads> findAdsByAuthorUsername(String email);
 }
