@@ -5,48 +5,57 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.security.MyUserPrincipal;
+import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
+
 @RequestMapping(path = "/users")
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
+    private final MyUserPrincipal userPrincipal;
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestParam(value = "currentPassword", required = false) String currentPassword,
-                                                      @RequestParam(value = "newPassword", required = false) String newPassword ) {
+    public ResponseEntity<Void> setPassword(@RequestBody NewPasswordDto newPasswordDto) {
         log.info("Was invoked set password for user method");
-        return ResponseEntity.ok(new NewPasswordDto());
+        authService.changePassword(newPasswordDto, userPrincipal);
+        return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getUser(Authentication authentication) {
-        log.info("Was invoked get user by Email method");
-        return ResponseEntity.ok(userService.getUserByEmail(authentication.getName()));
+    public ResponseEntity<UserDto> getUser() {
+        log.info("Was invoked get user method");
+        return ResponseEntity.ok(userService.getUserDtoByUsername(userPrincipal.getUsername()));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto,
-                                              Authentication authentication) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto) {
         log.info("Was invoked update user method");
-        return ResponseEntity.ok(userService.updateUser(dto, authentication.getName()));
+        return ResponseEntity.ok(userService.updateUser(dto, userPrincipal.getUsername()));
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image,
-                                                Authentication authentication) {
+    public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Was invoked update user image method");
-        userService.updateUserAvatar(authentication.getName(), image);
+        userService.updateUserAvatar(userPrincipal.getUsername(), image);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/avatar/{id}", produces = {MediaType.IMAGE_PNG_VALUE})
+    public ResponseEntity<byte[]> getUserAvatar(@PathVariable long id) {
+        return ResponseEntity.ok(userService.getUserAvatar(id));
     }
 }

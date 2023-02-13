@@ -17,10 +17,9 @@ import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.AdsNotFoundException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.mapper.AdsMapperImpl;
-import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.mapper.UserMapperImpl;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
@@ -28,10 +27,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdsServiceImplTest {
@@ -43,8 +42,6 @@ class AdsServiceImplTest {
     private UserService userService;
     @Spy
     private AdsMapper adsMapper = new AdsMapperImpl();
-    @Spy
-    private UserMapper userMapper = new UserMapperImpl();
     @InjectMocks
     private AdsServiceImpl out;
 
@@ -54,13 +51,17 @@ class AdsServiceImplTest {
     private CreateAdsDto createAdsDto;
     private User testUser;
     private Authentication auth;
+    private Image testImage;
 
     @BeforeEach
     void init() {
         testUser = new User();
         testUser.setId(42L);
-        testUser.setEmail("test@test.com");
+        testUser.setUsername("test@test.com");
         auth = new UsernamePasswordAuthenticationToken(testUser, null);
+
+        testImage = new Image();
+        testImage.setId(1L);
 
         createAdsDto = new CreateAdsDto();
         createAdsDto.setDescription("Test description");
@@ -96,9 +97,9 @@ class AdsServiceImplTest {
     @Test
     void shouldReturnAdsDto_WhenCreateAds() {
         Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
-        when(imageService.createImage(any(), any())).thenReturn(new Image());
+        when(imageService.createImage(any(), any())).thenReturn(testImage);
         when(adsRepository.save(any(Ads.class))).thenReturn(adsForMockSave);
-        when(userService.getUserByEmail(any(String.class))).thenReturn(null);
+        when(userService.getUser(any(String.class))).thenReturn(null);
         AdsDto result = out.createAds(createAdsDto, null, auth);
 
         assertThat(result).isNotNull();
@@ -127,11 +128,55 @@ class AdsServiceImplTest {
 
     @Test
     void shouldReturnResponseWrapperAdsForUser_whenGetAllAdsForUser() {
-        when(adsRepository.findAdsByAuthorEmail(any(String.class))).thenReturn(adsList);
+        when(adsRepository.findAdsByAuthorUsername(any(String.class))).thenReturn(adsList);
         ResponseWrapperAds result = out.getAllAdsForUser("Username");
 
         assertThat(result).isNotNull();
         assertThat(result.getCount()).isEqualTo(adsList.size());
         assertThat(result.getResults().contains(adsMapper.adsToAdsDto(ads1))).isTrue();
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToRemoveAds() {
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ads1));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.removeAds(ads1.getId(), auth));
+    }
+
+    @Test
+    void shouldExecuteDeleteOnce_whenUserCanRemoveAds() {
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ads1));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        out.removeAds(ads1.getId(), auth);
+
+        verify(adsRepository, atMostOnce()).delete(ads1);
+    }
+
+    @Test
+    void shouldThrowUserHasNoRightsException_whenUserHasNORightsToUpdateAds() {
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ads1));
+        doThrow(UserHasNoRightsException.class).when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+
+        assertThatExceptionOfType(UserHasNoRightsException.class)
+                .isThrownBy(() -> out.updateAdsById(ads1.getId(), createAdsDto, auth));
+    }
+
+    @Test
+    void shouldExecuteSaveOnce_whenUserCanUpdateAds() {
+        Ads adsForMockSave  = adsMapper.createAdsDtoToAds(createAdsDto);
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ads1));
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(auth, testUser.getUsername());
+        when(adsRepository.save(any())).thenReturn(adsForMockSave);
+
+        AdsDto result = out.updateAdsById(ads1.getId(), createAdsDto, auth);
+
+        verify(adsRepository, atMostOnce()).save(ads1);
+        verify(adsMapper, atMostOnce()).adsToAdsDto(ads1);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getPrice()).isEqualTo(createAdsDto.getPrice());
     }
 }

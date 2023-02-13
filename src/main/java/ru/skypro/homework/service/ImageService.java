@@ -8,4 +8,6 @@ public interface ImageService {
     byte[] updateAdsImage(long id, MultipartFile file);
 
     Image createImage(MultipartFile image, Ads ads);
+
+    byte[] getAdsImage(Long id);
 }

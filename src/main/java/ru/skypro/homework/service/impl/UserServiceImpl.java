@@ -11,6 +11,8 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.ImageNotFoundException;
+import ru.skypro.homework.exceptions.UserHasNoRightsException;
 import ru.skypro.homework.exceptions.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.AvatarRepository;
@@ -30,10 +32,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     /**
-     * Receive all users
-     * The repository method is being used{@link UserRepository#findAll()}
+     * Receive all users from the DB.
+     * The repository method {@link UserRepository#findAll()} is used.
      *
-     * @return all users
+     * @return {@link ResponseWrapperUserDto} with the number of users and list of {@link UserDto}
      */
     @Override
     public ResponseWrapperUserDto getAllUsers() {
@@ -43,15 +45,15 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Method for editing a user and saving it to DB
+     * Update current user with new information.
      *
-     * @param userDto
-     * @param username
-     * @return
+     * @param userDto dto from a client with new information
+     * @param username name to find a user in the DB
+     * @return {@link UserDto} with updated information
      */
     @Override
     public UserDto updateUser(UserDto userDto, String username) {
-        User user = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new);
+        User user = getUser(username);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -60,6 +62,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(response);
     }
 
+    /**
+     * Update user's avatar or create a new one from a file.
+     *
+     * @param username name to find a user in the DB
+     * @param file {@link MultipartFile} with the image to save
+     */
     @Override
     public void updateUserAvatar(String username, MultipartFile file) {
         log.info("Was invoked createImage method from {}", UserService.class.getSimpleName());
@@ -67,10 +75,10 @@ public class UserServiceImpl implements UserService {
             log.warn("File '{}' is empty.", file.getOriginalFilename());
             throw new EmptyFileException();
         }
-        // Эту строчку необходимо переписать после изучения работы с авторизацией.
-        User testUser = userRepository.findUserByEmail(username).orElseThrow(UserNotFoundException::new); // TODO: 24.01.2023 refactor with real user from DB after authorization task!!!
 
-        Avatar avatar = avatarRepository.findByUserId(testUser.getId()).orElse(new Avatar());
+        User currentUser = getUser(username);
+
+        Avatar avatar = avatarRepository.findByUserId(currentUser.getId()).orElse(new Avatar());
 
         try {
             avatar.setImage(file.getBytes());
@@ -78,20 +86,61 @@ public class UserServiceImpl implements UserService {
             log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
             throw new RuntimeException("Problems with uploaded image");
         }
-        avatar.setUser(testUser);
+        avatar.setUser(currentUser);
 
         avatarRepository.save(avatar);
     }
 
+    /**
+     * Get user avatar for by its id.
+     * @param id id identification number of an image
+     * @return byte array
+     */
     @Override
-    public UserDto getUserByEmail(String email) {
-        User response = userRepository.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
+    public byte[] getUserAvatar(long id) {
+        Avatar avatar = avatarRepository.findById(id).orElseThrow(ImageNotFoundException::new);
+        return avatar.getImage();
+    }
+
+    /**
+     * Return a {@link User} by its username from the DB.
+     * @param username name to find a user in the DB
+     * @return {@link User} entity
+     * @throws UserNotFoundException if user was not found
+     */
+    @Override
+    public User getUser(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
+    }
+
+    /**
+     * Get {@link User} by username from the DB and converts to {@link UserDto}.
+     * @param username name to find a user in the DB
+     * @return {@link UserDto} instance
+     * @throws UserNotFoundException if username not in the DB
+     */
+    @Override
+    public UserDto getUserDtoByUsername(String username) {
+        User response = getUser(username);
         return userMapper.userToUserDto(response);
     }
 
+    /**
+     * Check if username from {@link Authentication#getName()} and username equals
+     * OR if user has role ADMIN. Throws exception if none of the conditions are true.
+     * @param authentication {@link Authentication} instance from controller
+     * @param username name of a user
+     * @throws UserHasNoRightsException if username doesn't match authentication OR user is not 'ADMIN'
+     */
     @Override
-    public boolean checkIfUserIsAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream()
+    public void checkIfUserHasPermissionToAlter(Authentication authentication, String username) {
+        boolean matchUser = authentication.getName().equals(username);
+        boolean userIsAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().contains(Role.ADMIN.name()));
+
+        if (!(userIsAdmin || matchUser)){
+            log.warn("Current user has NO rights to perform this operation.");
+            throw new UserHasNoRightsException("Current user has NO rights to perform this operation.");
+        }
     }
 }
