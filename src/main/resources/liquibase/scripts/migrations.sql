@@ -7,15 +7,10 @@ create table if not exists users (
     last_name  varchar(255),
     username   varchar(255) unique not null,
     city       varchar(255),
-    enabled    boolean not null,
     password   varchar(255),
     phone      varchar(255),
-    reg_date   timestamp
-);
-
-create table if not exists authorities (
-    username  varchar(255) not null primary key,
-    authority varchar(32)
+    reg_date   timestamp,
+    role       varchar(255) not null
 );
 
 create table if not exists ads (
