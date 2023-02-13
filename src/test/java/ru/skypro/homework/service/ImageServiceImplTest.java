@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.ImageCanNotBeReadException;
 import ru.skypro.homework.exceptions.ImageNotFoundException;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.impl.ImageServiceImpl;
@@ -90,10 +91,10 @@ public class ImageServiceImplTest {
     }
 
     @Test
-    void shouldThrowIOException_whenUseBadFile() throws IOException {
+    void shouldThrowImageCanNotBeReadException_whenUseBadFile() throws IOException {
         when(mockedFile.getBytes()).thenThrow(IOException.class);
 
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(ImageCanNotBeReadException.class)
                 .isThrownBy(() -> out.createImage(mockedFile, new Ads()));
     }
 }

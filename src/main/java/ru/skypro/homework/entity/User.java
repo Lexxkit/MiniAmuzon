@@ -1,6 +1,7 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
+import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,11 +21,10 @@ public class User {
     private String city;
     private LocalDateTime regDate;
     private String password;
-    private boolean enabled;
-
+    @Enumerated(EnumType.STRING)
+    private Role role;
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Avatar avatar;
-
     @OneToMany(mappedBy = "author")
     private List<Ads> adsList;
 

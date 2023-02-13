@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.exceptions.EmptyFileException;
+import ru.skypro.homework.exceptions.ImageCanNotBeReadException;
 import ru.skypro.homework.exceptions.ImageNotFoundException;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.ImageService;
@@ -77,7 +78,7 @@ public class ImageServiceImpl implements ImageService {
             imageData = file.getBytes();
         } catch (IOException e) {
             log.error("File '{}' has some problems and cannot be read.", file.getOriginalFilename());
-            throw new RuntimeException("Problems with uploaded image");
+            throw new ImageCanNotBeReadException("Problems with uploaded image");
         }
         imageToSave.setData(imageData);
         imageToSave.setFileSize(file.getSize());

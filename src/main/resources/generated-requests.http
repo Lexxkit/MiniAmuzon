@@ -38,8 +38,8 @@ Authorization: Basic user password
 ###
 GET http://localhost:8080/users/me
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
-
+Authorization: Basic test1@test.com password
+#dGVzdDFAdGVzdC5jb206cGFzc3dvcmQ=
 ###
 PATCH http://localhost:8080/users/me
 Content-Type: application/json
