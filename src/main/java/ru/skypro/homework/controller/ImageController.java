@@ -1,5 +1,9 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -16,6 +20,11 @@ public class ImageController {
 
     private  final ImageService imageService;
 
+    @Operation(summary = "getAdsImage",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @GetMapping(value = "{id}", produces = {MediaType.IMAGE_PNG_VALUE})
     public ResponseEntity<byte[]> getAdsImage(@PathVariable Long id) {
         return ResponseEntity.ok(imageService.getAdsImage(id));
