@@ -29,6 +29,16 @@ public class AdsController {
     private final CommentService commentService;
     private final ImageService imageService;
 
+    @Operation(summary = "getAds",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    schema = @Schema(implementation = ResponseWrapperAds.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", content = @Content)
+            })
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getAds() {
         log.info("Was invoked get all ads method");
