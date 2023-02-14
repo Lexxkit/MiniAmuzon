@@ -22,13 +22,7 @@ public class ImageController {
 
     @Operation(summary = "getAdsImage",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                                    schema = @Schema(implementation = byte[].class)
-                            )
-                    ),
+                    @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @GetMapping(value = "{id}", produces = {MediaType.IMAGE_PNG_VALUE})
