@@ -84,7 +84,7 @@ public class UserController {
 
     @Operation(summary = "updateUserImage",
             responses = {
-                    @ApiResponse(responseCode = "200", content = @Content),
+                    @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "404", content = @Content)
             })
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
