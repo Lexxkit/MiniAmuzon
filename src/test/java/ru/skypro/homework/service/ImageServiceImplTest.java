@@ -7,9 +7,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Image;
+import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.EmptyFileException;
 import ru.skypro.homework.exceptions.ImageCanNotBeReadException;
 import ru.skypro.homework.exceptions.ImageNotFoundException;
@@ -29,10 +32,14 @@ import static org.mockito.Mockito.*;
 public class ImageServiceImplTest {
     @Mock
     private ImageRepository imageRepository;
+    @Mock
+    private UserService userService;
     @InjectMocks
     private ImageServiceImpl out;
     private Image testImage;
     private MultipartFile mockedFile;
+    private Ads testAds;
+    private User testUser;
 
     @BeforeEach
     void init() {
@@ -42,6 +49,15 @@ public class ImageServiceImplTest {
         testImage.setMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
         mockedFile = mock(MultipartFile.class);
+
+        testUser = new User();
+        testUser.setId(42L);
+        testUser.setUsername("test@test.com");
+
+        testAds = new Ads();
+        testAds.setAuthor(testUser);
+
+        testImage.setAds(testAds);
     }
 
     @Test
@@ -72,11 +88,14 @@ public class ImageServiceImplTest {
 
     @Test
     void shouldReturnBytesArray_whenUpdateAdsImage() throws IOException {
+        Authentication auth = new UsernamePasswordAuthenticationToken(testUser, null);
+
         when(imageRepository.findById(anyLong())).thenReturn(Optional.of(testImage));
         when(mockedFile.getBytes()).thenReturn(new byte[0]);
         when(imageRepository.save(any(Image.class))).thenReturn(testImage);
+        doNothing().when(userService).checkIfUserHasPermissionToAlter(any(), anyString());
 
-        byte[] result = out.updateAdsImage(anyLong(), mockedFile);
+        byte[] result = out.updateAdsImage(anyLong(), mockedFile, auth);
 
         assertThat(result).isNotNull();
         verify(imageRepository, atMostOnce()).save(testImage);
