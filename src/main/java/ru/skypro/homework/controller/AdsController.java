@@ -256,11 +256,14 @@ public class AdsController {
                     ),
                     @ApiResponse(responseCode = "404", content = @Content)
             })
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping (value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id, @RequestParam MultipartFile image){
+    public ResponseEntity<byte[]> updateAdsImage(@PathVariable Long id,
+                                                 @RequestParam MultipartFile image,
+                                                 Authentication authentication){
         log.info("Was invoked updateAdsImage method from {}", ImageController.class.getSimpleName());
 
-        byte[] imageBytes = imageService.updateAdsImage(id, image);
+        byte[] imageBytes = imageService.updateAdsImage(id, image, authentication);
         return ResponseEntity.ok(imageBytes);
     }
 }

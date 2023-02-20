@@ -87,6 +87,7 @@ public class UserController {
                     @ApiResponse(responseCode = "200", content = @Content),
                     @ApiResponse(responseCode = "404", content = @Content)
             })
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Was invoked update user image method");

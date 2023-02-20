@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.Ads;
@@ -11,6 +12,7 @@ import ru.skypro.homework.exceptions.ImageCanNotBeReadException;
 import ru.skypro.homework.exceptions.ImageNotFoundException;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.ImageService;
+import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 
@@ -19,19 +21,22 @@ import java.io.IOException;
 @Service
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
+    private final UserService userService;
 
     /**
      * Receive old image by id, update and save.
      *
-     * @param id identification number of an image
-     * @param file {@link MultipartFile} with an image
+     * @param id             identification number of an image
+     * @param file           {@link MultipartFile} with an image
+     * @param authentication {@link Authentication} instance from controller
      * @return byte array
      * @throws ImageNotFoundException if no image was found
      */
     @Override
-    public byte[] updateAdsImage(long id, MultipartFile file) {
+    public byte[] updateAdsImage(long id, MultipartFile file, Authentication authentication) {
         log.info("Was invoked findAllAds method from {}", ImageService.class.getSimpleName());
         Image oldImage = getImageFromDB(id);
+        userService.checkIfUserHasPermissionToAlter(authentication, oldImage.getAds().getAuthor().getUsername());
         extractInfoFromFile(file, oldImage);
         Image savedImage = imageRepository.save(oldImage);
         return savedImage.getData();
